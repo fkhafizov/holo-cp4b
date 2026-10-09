@@ -52,10 +52,20 @@ select{font:inherit;font-family:var(--font-mono);background:var(--panel);color:v
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:6px}
 .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
 .note{font-size:13px;color:var(--ink-3)}
+.hbar{display:flex;justify-content:space-between;align-items:start;gap:16px}
+.helpbtn{font:inherit;font-weight:600;font-size:14px;border:1px solid var(--accent);color:var(--accent);background:var(--panel);border-radius:8px;padding:6px 14px;cursor:pointer;white-space:nowrap}
+.helpbtn:hover{background:var(--accent-soft)}
+details.help summary{cursor:pointer;font-family:var(--font-display);font-weight:600;font-size:21px}
+details.help h3{font-size:15px;margin:16px 0 6px}
+.gl{display:grid;grid-template-columns:minmax(150px,auto) 1fr;gap:6px 18px;font-size:14px}
+.gl dt{font-family:var(--font-mono);font-weight:500;color:var(--ink)}
+.gl dd{margin:0;color:var(--ink-2)}
+.cur{background:var(--accent-soft);border-radius:8px;padding:10px 12px;font-size:14px;margin-top:10px}
+@media (max-width:620px){.gl{grid-template-columns:1fr}.gl dd{margin-bottom:6px}}
 .tablewrap{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{padding:5px 9px;text-align:right;border-bottom:1px solid var(--rule);white-space:nowrap}
-th{font-weight:600;color:var(--ink-3);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase}
+th{font-weight:600;color:var(--ink-3);font-size:12px}
 td{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
 tr.sel td{background:var(--accent-soft)}
 .pill{display:inline-block;padding:0 7px;border-radius:999px;font-size:11.5px;font-family:var(--font-body)}
@@ -64,9 +74,65 @@ tr.sel td{background:var(--accent-soft)}
 </style>
 <div class="wrap">
   <header style="display:grid;gap:8px">
-    <h1>Self-reversal distance in consecutive-cycle graphs</h1>
+    <div class="hbar"><h1>Self-reversal distance in consecutive-cycle graphs</h1>
+      <button type="button" class="helpbtn" id="helpbtn" aria-controls="help">Help</button></div>
     <p class="lede">For a word <span class="mono">X</span> with <span class="mono">k</span> zeros and <span class="mono">n−k</span> ones, let <span class="mono">X*</span> be <span class="mono">X</span> read backwards and <span class="mono">ρ<sub>l</sub>(X) = d<sub>G<sub>l</sub></sub>(X, X*)</span>. Holographically, reversal rotates the lattice path by 180° inside the <span class="mono">k×(n−k)</span> rectangle, so ρ measures how far a path is from being centrally symmetric. Every count below comes from exhaustive computation over all words.</p>
   </header>
+
+  <details class="panel help" id="help">
+    <summary>Help: what every element of this page means</summary>
+
+    <h3>Basic objects</h3>
+    <dl class="gl">
+      <dt>V<sub>k,n</sub></dt><dd>All binary words of length n with k zeros and n−k ones. There are C(n,k) of them.</dd>
+      <dt>G<sub>l</sub>(k,n)</dt><dd>The graph on V<sub>k,n</sub> whose moves cyclically rotate l consecutive letters (a window of length l). G<sub>2</sub> swaps neighbours; G<sub>3</sub> rotates three letters.</dd>
+      <dt>d(X,Y)</dt><dd>The distance in G<sub>l</sub>: the least number of moves that turn X into Y.</dd>
+      <dt>X*</dt><dd>X read backwards. Example: X = 00011 gives X* = 11000.</dd>
+      <dt>ρ = ρ<sub>l</sub>(X)</dt><dd>The self-reversal distance d(X, X*): how many moves it takes to reverse the word.</dd>
+      <dt>palindrome</dt><dd>A word with X* = X, such as 0110 or 10101. Exactly these words have ρ = 0.</dd>
+      <dt>A</dt><dd>The base word 0<sup>k</sup>1<sup>n−k</sup> (all zeros first). Its reversal A* = 1<sup>n−k</sup>0<sup>k</sup> is the word at the opposite corner of the k×(n−k) rectangle.</dd>
+      <dt>a<sub>i</sub>(X)</dt><dd>The number of ones to the left of the i-th zero, i.e. the height of column i of the lattice path of X. Reversal rotates the path by 180°.</dd>
+      <dt>ecc(A)</dt><dd>The eccentricity of A: the largest distance from A to any word reachable from it, computed by breadth-first search.</dd>
+    </dl>
+
+    <h3>Controls</h3>
+    <dl class="gl">
+      <dt>Cycle length l</dt><dd>Which graph G<sub>l</sub> to show (l = 2, …, 6).</dd>
+      <dt>Length n, Zeros k</dt><dd>The word length and the number of zeros. Only k ≤ n−k is listed: swapping the roles of 0 and 1 gives the same distribution.</dd>
+    </dl>
+
+    <h3>The line of numbers above the bar chart</h3>
+    <dl class="gl">
+      <dt>words</dt><dd>The number of words counted, C(n,k) (minus any word whose reversal lies in another component of the graph; the note under the chart says if this happens).</dd>
+      <dt>palindromes</dt><dd>The number of words with ρ = 0. It equals C(⌊n/2⌋, ⌊k/2⌋), or 0 when n is even and k is odd.</dd>
+      <dt>mean</dt><dd>The average of ρ over all words: (sum of ρ(X)) / (number of words). It is the typical number of moves needed to reverse a random word.</dd>
+      <dt>max</dt><dd>The largest value of ρ over all words: the hardest word to reverse.</dd>
+      <dt>ecc(A)</dt><dd>See above. For l = 2 and 3 it equals ⌈k(n−k)/(l−1)⌉ and, in all computed cases, equals max. For l ≥ 4 max can be smaller or larger than ecc(A).</dd>
+      <dt>area bound k(n−k)/(l−1)</dt><dd>The k×(n−k) rectangle has k(n−k) cells, and one move of G<sub>l</sub> changes at most l−1 cells of the lattice-path picture. So reversing A (whose path must sweep the whole rectangle) needs at least k(n−k)/(l−1) moves. It is a natural unit of distance; it is shown unrounded.</dd>
+      <dt>all values even</dt><dd>“yes” if every word has an even ρ. For l = 2 this happens exactly when k(n−k) is even; for l = 3 the data say: exactly when n and k are both even.</dd>
+    </dl>
+
+    <h3>Charts</h3>
+    <dl class="gl">
+      <dt>Distribution bars</dt><dd>Each bar is one value of ρ; its height is the number of words with that value. Hover over a bar for the count and the percentage. The vertical marker labelled ecc(A) shows the eccentricity of A, for comparison with the right end of the distribution.</dd>
+      <dt>Same words, different l</dt><dd>One curve per graph G<sub>l</sub> for the same n and k. The x-axis is ρ·(l−1)/k(n−k), i.e. ρ divided by the area bound, so 1 means “as far as sweeping the whole rectangle”. The y-axis is the share of words. This lets you compare graphs whose distances have different scales.</dd>
+    </dl>
+
+    <h3>Table of all computed cases</h3>
+    <dl class="gl">
+      <dt>n, k</dt><dd>The case. The highlighted row is the one shown in the charts.</dd>
+      <dt>words, palindromes</dt><dd>As above.</dd>
+      <dt>mean ρ, max ρ</dt><dd>The mean and the maximum of ρ, as above.</dd>
+      <dt>mean / area bound</dt><dd>mean ρ divided by k(n−k)/(l−1): the typical reversal distance as a fraction of the area bound. A value of 0.34 means that a typical word needs about a third of the area bound.</dd>
+      <dt>ecc(A)</dt><dd>As above.</dd>
+      <dt>all even</dt><dd>“yes” if all values of ρ are even.</dd>
+    </dl>
+
+    <h3>Fact cards</h3>
+    <p>Cards with a blue left edge state proved results. Cards with an amber edge state observations from the computations (conjectures). ν(R) is the largest number of non-overlapping dominoes that fit in the region R between the path of X and the path of X*.</p>
+
+    <div class="cur" id="help-cur"></div>
+  </details>
 
   <section class="panel">
     <h2>What the data show</h2>
@@ -232,7 +298,14 @@ const RHO={"2,2,1":[2,1,2,[[1,2]]],"2,3,1":[3,2,3,[[0,1],[2,2]]],"2,4,1":[4,3,4,
     document.getElementById('note1').textContent = R.none ? `${R.none} words have X* in a different component; they are left out.` :
       (l===2?(n<=14?'Computed by breadth-first search.':'Computed from the exact formula for l = 2 (breadth-first search was used up to n = 14).'): l===3?(n<=14?'Computed by breadth-first search.':'Computed from ρ₃ = |R| − ν(R) (breadth-first search was used up to n = 14).'):'Computed by breadth-first search.');
     drawBars(R,S,l,n,k); drawCompare(n,k); drawTable(l);
+    document.getElementById('help-cur').innerHTML=`<b>For the case shown now</b> (l = ${l}, n = ${n}, k = ${k}): `+
+      `${R.N.toLocaleString()} words, ${S.pal} of them palindromes. On average a word needs <b>${S.mean.toFixed(2)}</b> moves of G<sub>${l}</sub> to be reversed, `+
+      `and the hardest words need <b>${S.mx}</b>. The area bound is ${k}·${n-k}/${l-1} = ${S.bound.toFixed(2)}, so mean / area bound = ${(S.mean/S.bound).toFixed(3)}. `+
+      `The farthest word from A = 0<sup>${k}</sup>1<sup>${n-k}</sup> is at distance ecc(A) = ${R.ecc}`+
+      (S.mx===R.ecc?', the same as max.':(S.mx<R.ecc?`, larger than max = ${S.mx}.`:`, smaller than max = ${S.mx}.`))+
+      ` All values even: ${S.alleven?'yes':'no'}.`;
   }
+  document.getElementById('helpbtn').onclick=()=>{const h=document.getElementById('help');h.open=!h.open;if(h.open)h.scrollIntoView({behavior:'smooth',block:'start'});};
   fixState(); render();
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',render);
   let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(render,150);});
