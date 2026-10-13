@@ -3,7 +3,10 @@
 2026.10.08
 
 
+### 2026.10.08 holo-cp4b
 
+*  https://fkhafizov.github.io/holo-cp4b/selfReversalDistanceAtlas.html
+   * /Users/paulpaul/CODING/ai-agents/cc4-paper-v2  
 
 
 
