@@ -8,12 +8,12 @@
 *  https://fkhafizov.github.io/holo-cp4b/selfReversalDistanceAtlas.html
    * /Users/paulpaul/CODING/ai-agents/cc4-paper-v2  
 
-* https://fkhafizov.github.io/holo-vp4b/g3path-domino-tableaux-v0.html
-* https://fkhafizov.github.io/holo-vp4b/gamma-A5-2-shear.html
-* https://fkhafizov.github.io/holo-vp4b/geodesic-fillings.html
-* https://fkhafizov.github.io/holo-vp4b/inversion_vector.html
-* https://fkhafizov.github.io/holo-vp4b/selfReversalDistanceAtlas.html
-* https://fkhafizov.github.io/holo-vp4b/dominoTableaux-hortestPaths-cc3-Schreier.html (in RUSSIAN)
+* https://fkhafizov.github.io/holo-cp4b/g3path-domino-tableaux-v0.html
+* https://fkhafizov.github.io/holo-cp4b/gamma-A5-2-shear.html
+* https://fkhafizov.github.io/holo-cp4b/geodesic-fillings.html
+* https://fkhafizov.github.io/holo-cp4b/inversion_vector.html
+* https://fkhafizov.github.io/holo-cp4b/selfReversalDistanceAtlas.html
+* https://fkhafizov.github.io/holo-cp4b/dominoTableaux-hortestPaths-cc3-Schreier.html (in RUSSIAN)
 
 
 
