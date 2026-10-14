@@ -13,7 +13,7 @@
 * https://fkhafizov.github.io/holo-vp4b/geodesic-fillings.html
 * https://fkhafizov.github.io/holo-vp4b/inversion_vector.html
 * https://fkhafizov.github.io/holo-vp4b/selfReversalDistanceAtlas.html
-* https://fkhafizov.github.io/holo-vp4b/g3path-ru.html
+* https://fkhafizov.github.io/holo-vp4b/dominoTableaux-hortestPaths-cc3-Schreier.html (in RUSSIAN)
 
 
 
