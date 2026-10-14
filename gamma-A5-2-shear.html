@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A₅ Hologram Shear</title>
+<style>
+:root{
+  --bg:#fbfaf6; --panel:#ffffff; --ink:#1f2328; --muted:#6b6f76; --border:#e3dfd3;
+  --teal:#1a7a6e; --red:#c0392b; --purple:#6a4bc4;
+  --xonly:#bfe3dc; --yonly:#f6c9c3; --both:#d9d0f0; --forbidFill:#eceae4;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:24px;margin:0 0 8px}
+h2{font-size:16px;margin:0 0 8px}
+p{margin:0 0 10px;max-width:none}
+.mono{font-family:ui-monospace,"JetBrains Mono",Menlo,monospace}
+.grid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-top:14px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px}
+.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:12px 0 0}
+.controls label{font-size:13px;color:var(--muted)}
+select,button{font:inherit;font-size:13px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer}
+button.primary{background:var(--purple);color:#fff;border-color:var(--purple)}
+input[type=range]{width:220px;vertical-align:middle}
+svg{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin-top:8px}
+.sw{display:inline-block;width:14px;height:14px;border:1px solid #bbb;vertical-align:-3px;margin-right:4px;border-radius:2px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+td,th{padding:4px 6px;border-bottom:1px solid var(--border);text-align:left}
+th{color:var(--muted);font-weight:600}
+.eq{font-weight:700;color:var(--purple)}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:8px}
+.gcard{border:1px solid var(--border);border-radius:8px;padding:8px;background:#fff;cursor:pointer}
+.gcard:hover{border-color:var(--purple)}
+.gcard .pair{display:grid;grid-template-columns:1.35fr auto 1fr;align-items:center;gap:4px}
+.gcard .arrow{color:var(--purple);font-weight:700}
+.gcap{font-size:12px;color:var(--muted)}
+.math{font-family:"Cambria Math","STIX Two Math",Cambria,Georgia,serif;font-size:16px}
+ul{margin:4px 0 10px 20px;padding:0}
+li{margin:3px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Γ(A₅, 2): two holograms, one shear</h1>
+  <p>For the path tree A₅ = P₅ (vertices 1–2–3–4–5, rooted at 1) with k = 2 tokens there are two pictures of the same state X. The <b>tree hologram</b> from the paper is a k × (n−1) = 2 × 4 grid whose column eᵢ is filled to height ηᵢ(X) = number of tokens beyond the cut eᵢ. The <b>lattice-path hologram</b> is a staircase path in the (n−k) × k = 3 × 2 rectangle: read the word left to right, 0 = step east, 1 = step south. They are the same object. Row r of the tree picture belongs to one token, and its length is (#0's before the token) + (#1's before the token). The lattice path counts only the 0's. Since the number of 1's before a token is fixed by the token's rank (k − r), deleting it is a rigid horizontal shift of each row. Think of a deck of cards pushed sideways: every card (row) slides by its own fixed amount, no card changes length, so row-by-row differences between two decks — the distance — are untouched.</p>
+  <p>Drag the shear slider from 0 (tree hologram) to 1 (lattice path in the 3 × 2 box). Click nodes of Γ(A₅, 2) on the right to choose X (teal) and Y (red).</p>
+
+  <div class="controls">
+    <label>n <select id="selN"></select></label>
+    <label>k <select id="selK"></select></label>
+    <label>shear t <input type="range" id="tSlider" min="0" max="1" step="0.01" value="0"> <span id="tVal" class="mono">0.00</span></label>
+    <button class="primary" id="btnPlay">▶ animate</button>
+    <button id="btnT0">t = 0</button>
+    <button id="btnT1">t = 1</button>
+    <button id="btnClearY">clear Y</button>
+    <button id="btnSwap">swap X ↔ Y</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2 id="mainTitle">Hologram of X (and Y) under the row shear</h2>
+      <svg id="mainSvg"></svg>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--xonly)"></span>X only</span>
+        <span><span class="sw" style="background:var(--yonly)"></span>Y only</span>
+        <span><span class="sw" style="background:var(--both)"></span>X and Y</span>
+        <span><span class="sw" style="background:repeating-linear-gradient(45deg,#fff 0 3px,#9a958a 3px 4px)"></span>frozen (always filled)</span>
+        <span><span class="sw" style="background:repeating-linear-gradient(-45deg,#eceae4 0 3px,#3b3f46 3px 4px)"></span>unreachable (never filled)</span>
+        <span><span class="sw" style="border:2px dashed var(--purple);background:#fff"></span>(n−k) × k box</span>
+      </div>
+      <div id="readout" style="margin-top:12px"></div>
+    </div>
+    <div class="card">
+      <h2 id="hasseTitle">Γ(A₅, 2) = Hasse diagram of partitions in the 3 × 2 box</h2>
+      <svg id="hasseSvg"></svg>
+      <p class="gcap" style="margin-top:6px">Height = |λ| (cells under the lattice path). Click once for X, again for Y. Thick edges: one geodesic X → Y.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>Why the two pictures agree</h2>
+    <ul class="math">
+      <li>Tree hologram: ηᵢ(X) = #{tokens at positions &gt; i}, for edges eᵢ = {i, i+1}, i = 1,…,n−1.</li>
+      <li>Let the token positions be q₁ &lt; q₂ &lt; … &lt; q<sub>k</sub>. Row r (counted from the bottom) of the η-grid is filled exactly in columns i ≤ q<sub>k−r+1</sub> − 1, so its length is ℓ<sub>r</sub> = q<sub>k−r+1</sub> − 1 = (#0's before the token) + (#1's before the token).</li>
+      <li>The lattice path in the (n−k) × k box gives row length λ<sub>r</sub> = #0's before that token. Since #1's before it is k − r, we get ℓ<sub>r</sub> = λ<sub>r</sub> + (k − r): shifting row r left by k − r turns the η-grid into the Young diagram λ(X), and the η step profile into the lattice path.</li>
+      <li>Cell bookkeeping: k(n−1) = C(k,2) frozen + k(n−k) free + C(k,2) unreachable. For n = 5, k = 2: 8 = 1 + 6 + 1. The free cells form a parallelogram that the shear straightens into the 3 × 2 box.</li>
+      <li>Area: Σᵢ ηᵢ(X) = |λ(X)| + C(k,2). Distance: d(X,Y) = Σᵢ |ηᵢ(X) − ηᵢ(Y)| = Σ<sub>r</sub> |ℓ<sub>r</sub>(X) − ℓ<sub>r</sub>(Y)| = Σ<sub>r</sub> |λ<sub>r</sub>(X) − λ<sub>r</sub>(Y)| = |λ(X) △ λ(Y)|.</li>
+      <li>Consequently Γ(A<sub>n</sub>, k) is the Hasse diagram of the lattice L(k, n−k) of partitions in the box, and diam Γ(A<sub>n</sub>, k) = k(n−k) (empty box ↔ full box).</li>
+      <li>Contrast with D₅: there the last two η-columns are independent leaf bits (x₄, x₅) instead of the suffix sums (x₄+x₅, x₅). The rows of the η-grid are no longer "one token each", so no row shear produces a rectangle; the maximal pair 11000 → 00011 has area 5 instead of 6.</li>
+    </ul>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2 id="galTitle">All states: tree hologram (t = 0) → lattice path (t = 1)</h2>
+    <div class="gallery" id="gallery"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+let n=5,k=2,states=[],idx={},dist=[],X=0,Y=null,t=0,playing=false;
+
+const key=q=>q.join(',');
+function combos(n,k){const out=[];const rec=(s,a)=>{if(a.length===k){out.push(a.slice());return}for(let p=s;p<=n;p++){a.push(p);rec(p+1,a);a.pop()}};rec(1,[]);return out}
+function word(q){let w='';for(let p=1;p<=n;p++)w+=q.includes(p)?'1':'0';return w}
+function eta(q){const e=[];for(let i=1;i<n;i++)e.push(q.filter(p=>p>i).length);return e}
+function rowsL(q){const L=[];for(let r=1;r<=k;r++)L[r]=q[k-r]-1;return L}       // η-grid row lengths, r=1 bottom
+function lam(q){const l=[];for(let r=1;r<=k;r++)l.push(q[k-r]-1-(k-r));return l} // box row lengths, bottom first
+function nbrs(q){const out=[],s=new Set(q);for(const p of q)for(const d of[-1,1]){const p2=p+d;if(p2>=1&&p2<=n&&!s.has(p2))out.push(q.map(v=>v===p?p2:v).sort((a,b)=>a-b))}return out}
+const binom=(a,b)=>{let r=1;for(let i=1;i<=b;i++)r=r*(a-b+i)/i;return Math.round(r)};
+const sum=a=>a.reduce((s,v)=>s+v,0);
+
+function build(){
+  states=combos(n,k);idx={};states.forEach((q,i)=>idx[key(q)]=i);
+  dist=states.map((q,i)=>{const d=new Array(states.length).fill(-1);d[i]=0;const Q=[i];
+    while(Q.length){const u=Q.shift();for(const v of nbrs(states[u])){const j=idx[key(v)];if(d[j]<0){d[j]=d[u]+1;Q.push(j)}}}return d});
+}
+
+/* ---------- hologram renderer ---------- */
+function holoSVG(qX,qY,t,cell,mini){
+  const padL=mini?4:44,padR=mini?4:180,padT=mini?4:22,padB=mini?4:64;
+  const W=padL+(n-1+k-1)*cell+padR, H=padT+k*cell+padB;
+  const sx=x=>padL+(x+k-1)*cell, sy=y=>padT+(k-y)*cell;
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<defs>
+    <pattern id="hf${mini?'m':''}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#9a958a" stroke-width="1.2"/></pattern>
+    <pattern id="hk${mini?'m':''}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#3b3f46" stroke-width="1.2"/></pattern>
+  </defs>`;
+  const LX=rowsL(qX), LY=qY?rowsL(qY):null;
+  // cells
+  for(let r=1;r<=k;r++)for(let i=1;i<=n-1;i++){
+    const sh=t*(k-r), x0=i-1-sh, c=i-(k-r);
+    const cat=c<=0?'frozen':(c>n-k?'forbid':'free');
+    const a=i<=LX[r], b=LY?i<=LY[r]:false;
+    let fill='#fff';
+    if(LY) fill=a&&b?'var(--both)':a?'var(--xonly)':b?'var(--yonly)':'#fff';
+    else if(a) fill='var(--xonly)';
+    if(cat==='forbid') fill='var(--forbidFill)';
+    const X0=sx(x0),Y0=sy(r);
+    s+=`<rect x="${X0}" y="${Y0}" width="${cell}" height="${cell}" fill="${fill}" stroke="#c9c3b3" stroke-width="1"/>`;
+    if(cat==='frozen') s+=`<rect x="${X0}" y="${Y0}" width="${cell}" height="${cell}" fill="url(#hf${mini?'m':''})" opacity="0.8"/>`;
+    if(cat==='forbid') s+=`<rect x="${X0}" y="${Y0}" width="${cell}" height="${cell}" fill="url(#hk${mini?'m':''})" opacity="0.55"/>`;
+  }
+  // box frame
+  s+=`<rect x="${sx(0)}" y="${sy(k)}" width="${(n-k)*cell}" height="${k*cell}" fill="none" stroke="var(--purple)" stroke-width="${mini?1.6:2.5}" stroke-dasharray="${mini?'4 3':'7 5'}" opacity="${0.2+0.8*t}"/>`;
+  // lattice paths
+  function pts(q){const L=rowsL(q);const p=[[0,k]];for(let r=k;r>=1;r--){const R=L[r]-t*(k-r);p.push([R,r],[R,r-1])}p.push([n-1-t*(k-1),0]);return p}
+  function poly(q,col,dash){return `<polyline points="${pts(q).map(([x,y])=>sx(x)+','+sy(y)).join(' ')}" fill="none" stroke="${col}" stroke-width="${mini?2:3.2}" stroke-linejoin="round" ${dash?`stroke-dasharray="${mini?'4 3':'8 5'}"`:''}/>`}
+  s+=poly(qX,'var(--teal)',false);
+  if(qY) s+=poly(qY,'var(--red)',true);
+  if(!mini){
+    // token labels on the vertical (drop / south) segments
+    const tok=(q,col,dx)=>{const L=rowsL(q);let o='';for(let r=1;r<=k;r++){const R=L[r]-t*(k-r);const cx=sx(R)+dx,cy=sy(r-0.5);
+      o+=`<circle cx="${cx}" cy="${cy}" r="10" fill="#fff" stroke="${col}" stroke-width="1.5"/><text x="${cx}" y="${cy+4}" font-size="11" font-weight="700" text-anchor="middle" fill="${col}">${q[k-r]}</text>`}return o};
+    s+=tok(qX,'var(--teal)',qY?-12:0);
+    if(qY) s+=tok(qY,'var(--red)',12);
+    // column labels: edges e_i (t=0) fade into zero-columns z_c (t=1)
+    const eX=eta(qX), eY=qY?eta(qY):null;
+    for(let i=1;i<=n-1;i++){
+      const cx=sx(i-0.5);
+      s+=`<text x="${cx}" y="${sy(0)+16}" font-size="12" text-anchor="middle" fill="#555" opacity="${Math.max(0,1-2*t)}">e${i}</text>`;
+      s+=`<text x="${cx}" y="${sy(0)+32}" font-size="11" text-anchor="middle" fill="var(--purple)" opacity="${Math.max(0,1-2*t)}" class="mono">η=${eY?eX[i-1]+'/'+eY[i-1]:eX[i-1]}</text>`;
+    }
+    for(let c=1;c<=n-k;c++){
+      s+=`<text x="${sx(c-0.5)}" y="${sy(0)+16}" font-size="12" text-anchor="middle" fill="var(--purple)" opacity="${Math.max(0,2*t-1)}">0 #${c}</text>`;
+    }
+    // row identities  ℓ<sub>r</sub> = λ<sub>r</sub> + (k−r)
+    const lX=lam(qX);
+    for(let r=1;r<=k;r++){
+      const txt=`ℓ=${LX[r]} → λ=${lX[r-1]}  (shift ${k-r})`;
+      s+=`<text x="${sx(n-1)+34}" y="${sy(r-0.5)+4}" font-size="11" fill="var(--teal)" class="mono">${txt}</text>`;
+    }
+    s+=`<text x="${sx(-(k-1))}" y="${sy(k)-8}" font-size="11" fill="#777">${t<0.5?'tree hologram: '+k+' × '+(n-1)+' grid, column eᵢ filled to ηᵢ':'lattice path in the '+(n-k)+' × '+k+' box (0 = east, 1 = south)'}</text>`;
+  }
+  return s+'</svg>';
+}
+
+/* ---------- Hasse diagram / token graph ---------- */
+function geodesicEdges(a,b){const E=new Set();if(b===null)return E;let u=a;while(u!==b){const q=states[u];
+  for(const v of nbrs(q)){const j=idx[key(v)];if(dist[j][b]===dist[u][b]-1){E.add(Math.min(u,j)+'-'+Math.max(u,j));u=j;break}}}return E}
+function drawHasse(){
+  const svg=document.getElementById('hasseSvg');
+  const maxR=k*(n-k), W=380, step=Math.max(26,Math.min(52,520/Math.max(maxR,1))), padY=26, H=padY*2+maxR*step;
+  const groups={};states.forEach((q,i)=>{const r=sum(lam(q));(groups[r]=groups[r]||[]).push(i)});
+  const pos=[];
+  Object.keys(groups).forEach(r=>{const g=groups[r].slice().sort((a,b)=>{const la=lam(states[a]),lb=lam(states[b]);for(let j=0;j<k;j++)if(la[j]!==lb[j])return lb[j]-la[j];return 0});
+    g.forEach((i,j)=>{pos[i]={x:20+(j+1)*(W-40)/(g.length+1),y:H-padY-(+r)*step}})});
+  const geo=geodesicEdges(X,Y);
+  let s='';
+  states.forEach((q,i)=>{for(let j=i+1;j<states.length;j++)if(dist[i][j]===1){const g=geo.has(i+'-'+j);
+    s+=`<line x1="${pos[i].x}" y1="${pos[i].y}" x2="${pos[j].x}" y2="${pos[j].y}" stroke="${g?'var(--purple)':'#b9b4a8'}" stroke-width="${g?4:1.3}"/>`}});
+  const big=states.length<=20;
+  states.forEach((q,i)=>{const isX=i===X,isY=i===Y;const f=isX?'var(--teal)':isY?'var(--red)':'#fff';const tc=isX||isY?'#fff':'#333';
+    s+=`<g data-i="${i}" style="cursor:pointer"><rect x="${pos[i].x-(big?28:20)}" y="${pos[i].y-10}" width="${big?56:40}" height="20" rx="10" fill="${f}" stroke="#777"/>
+      <text x="${pos[i].x}" y="${pos[i].y+4}" font-size="${big?11:8}" text-anchor="middle" fill="${tc}" class="mono">${word(q)}</text></g>`});
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=s;
+  svg.querySelectorAll('g[data-i]').forEach(g=>g.addEventListener('click',()=>pick(+g.dataset.i)));
+}
+function pick(i){if(Y===null&&i!==X)Y=i;else{X=i;Y=null}renderAll()}
+
+/* ---------- readout ---------- */
+function fmt(a){return '('+a.join(', ')+')'}
+function readout(){
+  const qX=states[X],qY=Y!==null?states[Y]:null;
+  const row=(lbl,fx,fy)=>`<tr><th>${lbl}</th><td class="mono" style="color:var(--teal)">${fx}</td>${qY?`<td class="mono" style="color:var(--red)">${fy}</td>`:''}</tr>`;
+  const C=binom(k,2);
+  let h=`<table><tr><th></th><th>X</th>${qY?'<th>Y</th>':''}</tr>`;
+  h+=row('word',word(qX),qY&&word(qY));
+  h+=row('token positions q',fmt(qX),qY&&fmt(qY));
+  h+=row('η = (η_e1,…)',fmt(eta(qX)),qY&&fmt(eta(qY)));
+  h+=row('Σ η (tree area)',sum(eta(qX)),qY&&sum(eta(qY)));
+  h+=row('λ (box rows, bottom first)',fmt(lam(qX)),qY&&fmt(lam(qY)));
+  h+=row('|λ| (cells under path)',sum(lam(qX)),qY&&sum(lam(qY)));
+  h+=`</table><p style="margin-top:8px">Σ η = |λ| + C(${k},2) = |λ| + ${C}: the ${C} frozen cell${C===1?' accounts':'s account'} for the difference.</p>`;
+  if(qY){
+    const eX=eta(qX),eY=eta(qY),lX=lam(qX),lY=lam(qY);
+    const dEta=sum(eX.map((v,i)=>Math.abs(v-eY[i]))), dLam=sum(lX.map((v,i)=>Math.abs(v-lY[i])));
+    h+=`<p>d<sub>BFS</sub>(X,Y) = <span class="eq">${dist[X][Y]}</span> &nbsp;·&nbsp; Σ|Δη| = ${eX.map((v,i)=>Math.abs(v-eY[i])).join('+')} = <span class="eq">${dEta}</span> &nbsp;·&nbsp; |λ(X) △ λ(Y)| = ${lX.map((v,i)=>Math.abs(v-lY[i])).join('+')} = <span class="eq">${dLam}</span></p>
+    <p class="gcap">The coloured X-only / Y-only cells are the same cells at every value of t; the shear only moves them sideways.</p>`;
+  }
+  document.getElementById('readout').innerHTML=h;
+}
+
+/* ---------- gallery ---------- */
+function gallery(){
+  const g=document.getElementById('gallery');
+  const cell=n<=6?20:14;
+  g.innerHTML=states.map((q,i)=>`<div class="gcard" data-i="${i}">
+    <div class="pair">${holoSVG(q,null,0,cell,true)}<span class="arrow">→</span>${holoSVG(q,null,1,cell,true)}</div>
+    <div class="gcap mono">${word(q)} &nbsp; η=${fmt(eta(q))} &nbsp; λ=${fmt(lam(q))}</div></div>`).join('');
+  g.querySelectorAll('.gcard').forEach(c=>c.addEventListener('click',()=>{X=+c.dataset.i;Y=null;renderAll();window.scrollTo({top:0,behavior:'smooth'})}));
+}
+
+/* ---------- main ---------- */
+function renderMain(){
+  const qX=states[X],qY=Y!==null?states[Y]:null;
+  const svg=document.getElementById('mainSvg');
+  const tmp=document.createElement('div');tmp.innerHTML=holoSVG(qX,qY,t,n<=6?64:44,false);
+  const ns=tmp.firstChild;svg.setAttribute('viewBox',ns.getAttribute('viewBox'));svg.innerHTML=ns.innerHTML;
+  document.getElementById('tVal').textContent=t.toFixed(2);
+  document.getElementById('tSlider').value=t;
+}
+function titles(){
+  const sub=['₀','₁','₂','₃','₄','₅','₆','₇','₈','₉'];
+  const A='A'+String(n).split('').map(d=>sub[+d]).join('');
+  document.getElementById('hasseTitle').textContent=`Γ(${A}, ${k}) = Hasse diagram of partitions in the ${n-k} × ${k} box`;
+  document.getElementById('galTitle').textContent=`All ${states.length} states: tree hologram (t = 0) → lattice path (t = 1)`;
+}
+function renderAll(){renderMain();drawHasse();readout()}
+function rebuild(){build();
+  const d=idx[key([1,3].filter(v=>v<=n).slice(0,k))],e=idx[key([2,5].filter(v=>v<=n).slice(0,k))];
+  X=(n===5&&k===2)?idx['1,3']:0;Y=(n===5&&k===2)?idx['2,5']:null;
+  titles();gallery();renderAll()}
+
+const selN=document.getElementById('selN'),selK=document.getElementById('selK');
+for(let v=3;v<=8;v++)selN.innerHTML+=`<option ${v===5?'selected':''}>${v}</option>`;
+function fillK(){selK.innerHTML='';for(let v=1;v<n;v++)selK.innerHTML+=`<option ${v===k?'selected':''}>${v}</option>`}
+fillK();
+selN.onchange=()=>{n=+selN.value;if(k>=n)k=n-1;fillK();rebuild()};
+selK.onchange=()=>{k=+selK.value;rebuild()};
+document.getElementById('tSlider').oninput=e=>{t=+e.target.value;renderMain()};
+document.getElementById('btnT0').onclick=()=>{t=0;renderMain()};
+document.getElementById('btnT1').onclick=()=>{t=1;renderMain()};
+document.getElementById('btnClearY').onclick=()=>{Y=null;renderAll()};
+document.getElementById('btnSwap').onclick=()=>{if(Y!==null){[X,Y]=[Y,X];renderAll()}};
+document.getElementById('btnPlay').onclick=()=>{if(playing)return;playing=true;const t0=performance.now(),start=t,target=t<0.5?1:0;
+  const step=now=>{const u=Math.min(1,(now-t0)/1600);const e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;t=start+(target-start)*e;renderMain();if(u<1)requestAnimationFrame(step);else playing=false};requestAnimationFrame(step)};
+rebuild();
+})();
+</script>
+</body>
+</html>
