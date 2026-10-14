@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Доминошные таблицы и геодезические в G₃</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --paper:#F7F9FC;--panel:#FFFFFF;--ink:#1E2740;--muted:#5B6478;--grid:#DCE2EC;--region:#E6EEFB;--line:#CBD3E1;
+  --x:#C63D2F;--y:#2448B5;--win:#FFE29A;--vdom:#93D69A;--hdom:#F7BE7E;--single:#F09A9A;
+  --btn:#2448B5;--btnText:#FFFFFF;--warn:#A23B12;--edge:#9AA5BA;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#141925;--panel:#1C2333;--ink:#E6EAF2;--muted:#9AA3B5;--grid:#2E3647;--region:#22304A;--line:#38425A;
+  --x:#F07A6C;--y:#7C9BFF;--win:#6B5A20;--vdom:#4F9A57;--hdom:#B9782F;--single:#B05555;
+  --btn:#7C9BFF;--btnText:#10131B;--warn:#FFAA80;--edge:#56607A;}}
+:root[data-theme="dark"]{
+  --paper:#141925;--panel:#1C2333;--ink:#E6EAF2;--muted:#9AA3B5;--grid:#2E3647;--region:#22304A;--line:#38425A;
+  --x:#F07A6C;--y:#7C9BFF;--win:#6B5A20;--vdom:#4F9A57;--hdom:#B9782F;--single:#B05555;
+  --btn:#7C9BFF;--btnText:#10131B;--warn:#FFAA80;--edge:#56607A;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;font-size:17px;line-height:1.55}
+.wrap{max-width:1240px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.6rem;font-weight:600;margin:0 0 4px;line-height:1.2}
+.lead{margin:0 0 16px;color:var(--muted);max-width:76ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.panel h2{font-size:1.05rem;margin:0 0 8px;font-weight:600}
+.top{display:grid;grid-template-columns:1.05fr 1fr;gap:16px;margin-top:16px}
+@media (max-width:900px){.top{grid-template-columns:1fr}}
+.inputs{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.inputs .f{display:flex;flex-direction:column}
+label{font-size:.88rem;color:var(--muted);margin-bottom:2px}
+input{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}
+input.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:.95rem;letter-spacing:.05em;width:13em}
+input.num{width:4.2em}
+button{font:inherit;font-size:.93rem;padding:6px 12px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.primary{background:var(--btn);color:var(--btnText);border-color:var(--btn);font-weight:600}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible{outline:3px solid var(--y);outline-offset:2px}
+.msg{font-size:.92rem;color:var(--warn);min-height:1.2em;margin-top:8px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.controls .sp{display:flex;align-items:center;gap:6px;font-size:.88rem;color:var(--muted);margin-left:auto}
+.controls .sp input{width:100px}
+svg{display:block;width:100%;height:auto}
+#tab{max-height:52vh}
+#graph{max-height:62vh}
+.caption{color:var(--muted);font-size:.93rem;margin:6px 0 0;text-align:center}
+.stats{display:flex;flex-wrap:wrap;gap:4px 22px;font-size:.95rem;margin-top:8px}
+.stats span b{font-weight:600}
+.ok{color:#1F7A3A}.no{color:var(--warn)}
+.strings{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.strings .snap{width:118px;text-align:center;font-size:.8rem;color:var(--muted)}
+.strings .arr{color:var(--muted)}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.gallery button{padding:4px;border-radius:6px;font-size:.78rem;color:var(--muted)}
+.gallery button.sel{outline:3px solid var(--y);outline-offset:1px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.86rem;color:var(--muted);margin-top:8px;justify-content:center}
+.legend i{display:inline-block;width:13px;height:13px;border:1.5px solid var(--ink);border-radius:3px;vertical-align:-2px;margin-right:5px}
+dialog{max-width:680px;width:calc(100% - 32px);border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);padding:20px 22px}
+dialog::backdrop{background:rgba(20,25,40,.35)}
+dialog h2{margin-top:0}
+.fresh{animation:pop .45s ease-out;transform-box:fill-box;transform-origin:center}
+@keyframes pop{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.fresh{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Доминошные таблицы ↔ кратчайшие пути в графе Шрейера для 3-циклов</h1>
+<p class="lead">Аналог рисунка с таблицей Юнга: для G₂ (соседние транспозиции) кратчайший путь X → Y — это стандартная таблица Юнга формы R(X,Y). Для G₃ (циклы трёх соседних букв) каждый ход кладёт нумерованную доминошку или одну клетку, и кратчайшие пути соответствуют нумерованным разбиениям R на d = |R| − ν(R) кусков.</p>
+
+<section class="panel">
+  <div class="inputs">
+    <div class="f"><label for="X">X (меньшая форма)</label><input id="X" class="mono" value="00011" spellcheck="false" autocomplete="off"></div>
+    <div class="f"><label for="Y">Y (большая форма)</label><input id="Y" class="mono" value="11000" spellcheck="false" autocomplete="off"></div>
+    <button class="primary" id="build">Построить</button>
+    <div class="f"><label for="n">n</label><input id="n" class="num" type="number" min="3" max="16" value="7"></div>
+    <div class="f"><label for="k">k (нулей)</label><input id="k" class="num" type="number" min="1" max="15" value="3"></div>
+    <button id="rand">Случайная пара X ≤ Y</button>
+    <button id="pre1">2×3</button>
+    <button id="pre2">3×3</button>
+    <button id="pre3">4×4</button>
+    <button id="help">Справка</button>
+  </div>
+  <div class="msg" id="msg" role="status"></div>
+  <div class="stats" id="stats"></div>
+</section>
+
+<div class="top">
+  <section class="panel">
+    <h2>Доминошная таблица выбранного пути</h2>
+    <div class="controls">
+      <button class="primary" id="start">Старт</button>
+      <button id="back">◂</button><button id="step">▸</button>
+      <button id="reset">Сброс</button>
+      <button id="prev">← таблица</button><button id="next">таблица →</button>
+      <button id="rnd">Случайная</button>
+      <span class="sp"><label for="speed" style="margin:0">Скорость</label><input id="speed" type="range" min="150" max="2000" step="50" value="900"></span>
+    </div>
+    <svg id="tab" role="img" aria-label="Доминошная таблица"></svg>
+    <p class="caption" id="cap"></p>
+    <div class="legend">
+      <span><i style="background:var(--vdom)"></i>вертикальная доминошка (0 прыгает через 11)</span>
+      <span><i style="background:var(--hdom)"></i>горизонтальная (1 прыгает через 00)</span>
+      <span><i style="background:var(--single)"></i>одна клетка</span>
+    </div>
+  </section>
+  <section class="panel">
+    <h2>Граф: интервал [X, Y] в G₃(k, n), волнистые рёбра — выбранный путь</h2>
+    <svg id="graph" role="img" aria-label="Подграф кратчайших путей"></svg>
+    <p class="caption" id="gcap"></p>
+  </section>
+</div>
+
+<section class="panel" style="margin-top:16px">
+  <h2>Движение «струны»: положение в моменты t = 0, …, d</h2>
+  <div class="strings" id="strings"></div>
+</section>
+
+<section class="panel" style="margin-top:16px">
+  <h2 id="galH">Все доминошные таблицы формы R(X,Y)</h2>
+  <div class="gallery" id="gallery"></div>
+</section>
+</div>
+
+<dialog id="dlg">
+  <h2>Что здесь изображено</h2>
+  <p><b>Граф.</b> Вершины — слова длины n с k нулями. Ребро — циклический сдвиг трёх соседних букв (действие 3-цикла (i, i+1, i+2)). Это граф Шрейера S<sub>n</sub> по S<sub>k</sub>×S<sub>n−k</sub> с образующими-3-циклами.</p>
+  <p><b>Форма.</b> a<sub>i</sub> = число единиц левее i-го нуля, столбец i имеет высоту a<sub>i</sub>. Если a(X) ≤ a(Y) покомпонентно, то R(X,Y) — косая форма между двумя лестницами (красная пунктирная — X, синяя — Y).</p>
+  <p><b>Ходы.</b> Сдвиг 011 ↔ 110 меняет один столбец на 2 (вертикальная доминошка), 001 ↔ 100 — два соседних столбца на 1 (горизонтальная), остальные сдвиги — одну клетку.</p>
+  <p><b>Доминошная таблица.</b> Разбиение R на d кусков (доминошки и клетки), занумерованных 1, …, d, так что после каждого шага заполненная часть — снова лестница: клетка (i, r) кладётся только после клетки под ней и клетки справа от неё (если они в R). Минимальное число кусков равно d = |R| − ν(R), где ν(R) — максимальное число непересекающихся доминошек в R.</p>
+  <p><b>Биекция.</b> Путь ↦ таблица: номер куска — шаг, на котором струна проходит через него. Каждая геодезическая (для a(X) ≤ a(Y)) проходит каждую клетку R ровно один раз, поэтому отображение — биекция. Число таблиц здесь считается независимо (заполнением идеалов в R, без слов и графа) и сравнивается с числом кратчайших путей по BFS.</p>
+  <p><b>Управление.</b> Старт/Пауза, ◂ ▸ — шаг, Сброс, ← → — соседняя таблица в нумерации, «Случайная» — равномерно случайная. Щелчок по миниатюре выбирает таблицу. Клавиши: пробел, ← →.</p>
+  <button class="primary" id="close">Закрыть</button>
+</dialog>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const G={X:"",Y:"",n:0,k:0,d:0,R:[],DX:null,DY:null,cnt:null,N:0,idx:0,geo:null,step:0,timer:null,fresh:false};
+
+/* ---------- combinatorics ---------- */
+function binom(n,k){let r=1;for(let i=1;i<=k;i++)r=r*(n-k+i)/i;return Math.round(r);}
+function aVec(w){const a=[];let o=0;for(const c of w){if(c==="1")o++;else a.push(o);}return a;}
+function nbrs(x){ // cyclic shifts of 3 consecutive letters, fixed order
+  const out=[],seen=new Set();
+  for(let i=0;i+3<=x.length;i++){const w=x.slice(i,i+3);
+    for(const s of [w.slice(1)+w[0],w[2]+w.slice(0,2)]){if(s===w)continue;
+      const y=x.slice(0,i)+s+x.slice(i+3);if(!seen.has(y)){seen.add(y);out.push({y,i,from:w,to:s});}}}
+  return out;
+}
+function bfs(src){const D=new Map([[src,0]]),Q=[src];
+  for(let h=0;h<Q.length;h++){const x=Q[h];for(const e of nbrs(x))if(!D.has(e.y)){D.set(e.y,D.get(x)+1);Q.push(e.y);}}
+  return {D,Q};}
+function geoCounts(){ // number of geodesics from w to Y
+  const cnt=new Map(),order=[...G.DY.keys()].filter(w=>G.DX.get(w)+G.DY.get(w)===G.d).sort((u,v)=>G.DY.get(u)-G.DY.get(v));
+  for(const x of order){if(x===G.Y){cnt.set(x,1);continue;}let c=0;
+    for(const e of nbrs(x))if(G.DY.get(e.y)===G.DY.get(x)-1)c+=cnt.get(e.y);cnt.set(x,c);}
+  return {cnt,interval:order};
+}
+function unrank(j){ // j-th geodesic in lexicographic order of moves
+  const words=[G.X],moves=[];let x=G.X;
+  while(x!==G.Y){for(const e of nbrs(x)){if(G.DY.get(e.y)!==G.DY.get(x)-1)continue;
+      const c=G.cnt.get(e.y);if(j<c){moves.push(piece(x,e));words.push(e.y);x=e.y;break;}j-=c;}}
+  return {words,moves};
+}
+function piece(u,e){const au=aVec(u),av=aVec(e.y),cells=[],cols=[];
+  au.forEach((p,i)=>{if(p!==av[i]){cols.push(i);for(let r=Math.min(p,av[i]);r<Math.max(p,av[i]);r++)cells.push([i,r]);}});
+  const type=cells.length===1?"single":(cols.length===1?"vdom":"hdom");
+  return {...e,cells,type,a:av};}
+function maxDominoes(cells){const key=c=>c.join(","),idx=new Map(cells.map((c,j)=>[key(c),j]));
+  const adj=cells.map(([i,r])=>[[i+1,r],[i-1,r],[i,r+1],[i,r-1]].map(c=>idx.get(key(c))).filter(v=>v!==undefined));
+  const match=new Array(cells.length).fill(-1);let m=0;
+  const aug=(u,seen)=>{for(const v of adj[u]){if(seen[v])continue;seen[v]=1;if(match[v]<0||aug(match[v],seen)){match[v]=u;return true;}}return false;};
+  cells.forEach(([i,r],u)=>{if((i+r)%2===0&&aug(u,[]))m++;});return m;}
+function countTableaux(aX,aY,d){ // independent count: numbered tilings of R whose prefixes are order ideals
+  const k=aX.length,memo=new Map();
+  const inR=(i,r)=>i>=0&&i<k&&r>=aX[i]&&r<aY[i];
+  function ok(h,i,r){return !inR(i+1,r)||h[i+1]>r;} // cell (i,r) needs the cell to its right
+  function f(h,left){
+    const key=h.join(",")+"|"+left;if(memo.has(key))return memo.get(key);
+    let done=true;for(let i=0;i<k;i++)if(h[i]<aY[i]){done=false;break;}
+    let t=0;
+    if(done)t=left===0?1:0;
+    else if(left>0){
+      for(let i=0;i<k;i++){const r=h[i];if(r>=aY[i])continue;
+        if(ok(h,i,r)){h[i]++;t+=f(h,left-1);h[i]--;                       // single square
+          if(r+1<aY[i]&&ok(h,i,r+1)){h[i]+=2;t+=f(h,left-1);h[i]-=2;}}   // vertical domino
+        if(i+1<k&&h[i+1]===r&&r<aY[i+1]&&ok(h,i+1,r)){h[i]++;h[i+1]++;t+=f(h,left-1);h[i]--;h[i+1]--;} // horizontal domino
+      }
+    }
+    memo.set(key,t);return t;}
+  return f(aX.slice(),d);
+}
+
+/* ---------- build ---------- */
+function msg(t){$("msg").textContent=t||"";}
+function build(){
+  stop();msg("");
+  let X=$("X").value.trim(),Y=$("Y").value.trim();
+  if(!/^[01]+$/.test(X)||!/^[01]+$/.test(Y))return msg("X и Y должны быть словами из 0 и 1.");
+  if(X.length!==Y.length)return msg("X и Y должны иметь одинаковую длину.");
+  const k=[...X].filter(c=>c==="0").length;
+  if(k!==[...Y].filter(c=>c==="0").length)return msg("У X и Y должно быть одинаковое число нулей.");
+  if(X.length<3)return msg("Нужно n ≥ 3.");
+  if(binom(X.length,k)>200000)return msg("Слишком большой граф: возьмите C(n,k) ≤ 200 000.");
+  let aX=aVec(X),aY=aVec(Y);
+  if(aY.every((v,i)=>v<=aX[i])&&X!==Y){[X,Y]=[Y,X];[aX,aY]=[aY,aX];$("X").value=X;$("Y").value=Y;msg("X и Y поменяны местами, чтобы a(X) ≤ a(Y).");}
+  else if(!aX.every((v,i)=>v<=aY[i]))return msg(`a(X) = (${aX}) и a(Y) = (${aY}) несравнимы. Биекция формулируется для косых форм a(X) ≤ a(Y); для несравнимых пар геодезическая может выйти из R (например 1001 → 0110).`);
+  if(X===Y)return msg("X = Y: путь пустой.");
+  G.X=X;G.Y=Y;G.n=X.length;G.k=k;$("n").value=G.n;$("k").value=k;
+  G.DX=bfs(X).D;G.DY=bfs(Y).D;G.d=G.DY.get(X);
+  G.R=[];aX.forEach((v,i)=>{for(let r=v;r<aY[i];r++)G.R.push([i,r]);});
+  const gc=geoCounts();G.cnt=gc.cnt;G.interval=gc.interval;G.N=G.cnt.get(X);
+  G.nu=maxDominoes(G.R);G.T=countTableaux(aX,aY,G.d);
+  layoutGraph();
+  const same=G.T===G.N;
+  $("stats").innerHTML=`<span>G₃(k = ${k}, n = ${G.n})</span><span>a(X) = (${aX.join(", ")})</span><span>a(Y) = (${aY.join(", ")})</span>
+   <span>|R| = <b>${G.R.length}</b></span><span>ν(R) = <b>${G.nu}</b></span><span>d(X,Y) = <b>${G.d}</b> ${G.d===G.R.length-G.nu?'<span class="ok">= |R| − ν(R)</span>':'<span class="no">≠ |R| − ν(R)</span>'}</span>
+   <span>кратчайших путей: <b>${G.N.toLocaleString()}</b></span><span>доминошных таблиц: <b>${G.T.toLocaleString()}</b> <span class="${same?"ok":"no"}">${same?"совпадает":"не совпадает"}</span></span>`;
+  select(0);buildGallery();
+}
+
+/* ---------- selection & playback ---------- */
+function select(j){stop();G.idx=((j%G.N)+G.N)%G.N;G.geo=unrank(G.idx);G.step=G.d;G.fresh=false;renderAll();
+  document.querySelectorAll(".gallery button").forEach(b=>b.classList.toggle("sel",+b.dataset.i===G.idx));}
+function stop(){if(G.timer){clearInterval(G.timer);G.timer=null;}btns();}
+function play(){if(G.step>=G.d){G.step=0;renderAll();}
+  G.timer=setInterval(()=>{if(G.step<G.d){G.step++;G.fresh=true;renderAll();}if(G.step>=G.d)stop();},+$("speed").value);btns();}
+function btns(){$("start").textContent=G.timer?"Пауза":(G.step>=G.d?"Старт":(G.step===0?"Старт":"Дальше"));
+  $("back").disabled=G.step===0;$("step").disabled=G.step>=G.d;}
+const tColor=t=>`hsl(${Math.round(250-250*t/Math.max(1,G.d))},62%,42%)`;
+const TYPE_VAR={vdom:"--vdom",hdom:"--hdom",single:"--single"};
+
+/* ---------- tableau drawing ---------- */
+function tableauSVG(geo,step,o){ // o: {s, crop, stairs, fresh, highlightT}
+  const s=o.s,aX=aVec(G.X),aY=aVec(G.Y),k=G.k;
+  const r0=o.crop?Math.min(...aX):0,r1=o.crop?Math.max(...aY):G.n-G.k,rows=Math.max(1,r1-r0);
+  const pL=o.crop?4:24,pB=o.crop?4:22,pT=6,pR=6,W=pL+k*s+pR,H=pT+rows*s+pB;
+  const X0=c=>pL+c*s,Y0=r=>pT+(r1-r)*s,ink=css("--ink");
+  let g="";
+  for(let i=0;i<k;i++)for(let r=r0;r<r1;r++)g+=`<rect x="${X0(i)}" y="${Y0(r+1)}" width="${s}" height="${s}" fill="${css("--panel")}" stroke="${css("--grid")}"/>`;
+  for(const [i,r] of G.R)g+=`<rect x="${X0(i)}" y="${Y0(r+1)}" width="${s}" height="${s}" fill="${css("--region")}" stroke="${css("--grid")}"/>`;
+  for(let j=0;j<step;j++){const m=geo.moves[j],set=new Set(m.cells.map(c=>c.join(",")));let pg="";
+    for(const [i,r] of m.cells)pg+=`<rect x="${X0(i)}" y="${Y0(r+1)}" width="${s}" height="${s}" fill="${css(TYPE_VAR[m.type])}" stroke="none"/>`;
+    const ins=Math.max(1.5,s*.07);
+    for(const [i,r] of m.cells){const L=!set.has(`${i-1},${r}`),Rr=!set.has(`${i+1},${r}`),T=!set.has(`${i},${r+1}`),B=!set.has(`${i},${r-1}`);
+      const xa=X0(i)+(L?ins:0),xb=X0(i+1)-(Rr?ins:0),ya=Y0(r+1)+(T?ins:0),yb=Y0(r)-(B?ins:0);
+      if(L)pg+=`<line x1="${xa}" y1="${ya}" x2="${xa}" y2="${yb}"/>`;if(Rr)pg+=`<line x1="${xb}" y1="${ya}" x2="${xb}" y2="${yb}"/>`;
+      if(T)pg+=`<line x1="${xa}" y1="${ya}" x2="${xb}" y2="${ya}"/>`;if(B)pg+=`<line x1="${xa}" y1="${yb}" x2="${xb}" y2="${yb}"/>`;}
+    const cx=m.cells.reduce((t,c)=>t+X0(c[0])+s/2,0)/m.cells.length,cy=m.cells.reduce((t,c)=>t+Y0(c[1])-s/2,0)/m.cells.length;
+    pg+=`<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${s*.42}" font-weight="600" fill="${ink}" stroke="none" font-family="Source Serif 4,Georgia,serif">${j+1}</text>`;
+    g+=`<g class="${o.fresh&&j===step-1?"fresh":""}" stroke="${ink}" stroke-width="${Math.max(1,s*.045)}" stroke-linecap="round">${pg}</g>`;}
+  const stair=a=>{let d=`M${X0(0)},${Y0(Math.max(r0,0))} L${X0(0)},${Y0(a[0])}`;
+    a.forEach((v,i)=>{d+=` L${X0(i+1)},${Y0(v)}`;if(i+1<a.length)d+=` L${X0(i+1)},${Y0(a[i+1])}`;});return d+` L${X0(a.length)},${Y0(r1)}`;};
+  if(o.stairs){
+    g+=`<path d="${stair(aY)}" fill="none" stroke="${css("--y")}" stroke-width="${s*.07}" stroke-linejoin="round"/>`;
+    g+=`<path d="${stair(aX)}" fill="none" stroke="${css("--x")}" stroke-width="${s*.07}" stroke-dasharray="${s*.18} ${s*.12}" stroke-linejoin="round"/>`;
+  }
+  if(o.cur!==undefined)g+=`<path d="${stair(aVec(geo.words[o.cur]))}" fill="none" stroke="${tColor(o.cur)}" stroke-width="${s*.11}" stroke-linejoin="round" stroke-linecap="round"/>`;
+  if(!o.crop){for(let i=0;i<k;i++)g+=`<text x="${X0(i)+s/2}" y="${H-6}" text-anchor="middle" font-size="13" fill="${css("--muted")}" font-family="Source Serif 4,Georgia,serif">${i+1}</text>`;}
+  return {vb:`0 0 ${W} ${H}`,g};
+}
+function renderAll(){
+  const geo=G.geo,st=G.step;
+  const t=tableauSVG(geo,st,{s:44,stairs:true,cur:st,fresh:G.fresh});G.fresh=false;
+  $("tab").setAttribute("viewBox",t.vb);$("tab").innerHTML=t.g;
+  const m=st>0?geo.moves[st-1]:null;
+  $("cap").innerHTML=`Таблица ${G.idx+1} из ${G.N.toLocaleString()}. `+(m?`Шаг ${st}: ${geo.words[st-1]} → ${geo.words[st]} (${m.from} ↦ ${m.to} на позициях ${m.i+1}–${m.i+3}), a = (${m.a.join(", ")}).`:`t = 0: струна в положении X.`);
+  renderStrings();drawGraph();btns();
+}
+function renderStrings(){const geo=G.geo;let h="";
+  for(let t=0;t<=G.d;t++){const tb=tableauSVG(geo,G.d,{s:16,crop:true,cur:t});
+    h+=`<div class="snap"><svg viewBox="${tb.vb}" style="${t===G.step?`outline:2px solid ${tColor(t)};outline-offset:2px;border-radius:3px`:""}">${tb.g}</svg>t = ${t}</div>`;
+    if(t<G.d)h+=`<span class="arr">→</span>`;}
+  $("strings").innerHTML=h;}
+
+/* ---------- graph ---------- */
+function layoutGraph(){
+  const L=[];for(const w of G.interval){const t=G.DX.get(w);(L[t]=L[t]||[]).push(w);}
+  L.forEach(l=>l.sort());
+  const pos=new Map();const setPos=()=>L.forEach(l=>l.forEach((w,j)=>pos.set(w,(j+.5)/l.length)));setPos();
+  const adj=w=>nbrs(w).map(e=>e.y).filter(y=>pos.has(y));
+  for(let pass=0;pass<4;pass++){const seq=pass%2?[...L.keys()].reverse():[...L.keys()];
+    for(const t of seq){const ref=pass%2?t+1:t-1;if(!L[ref])continue;
+      const bc=w=>{const ns=adj(w).filter(y=>G.DX.get(y)===ref);return ns.length?ns.reduce((s,y)=>s+pos.get(y),0)/ns.length:pos.get(w);};
+      L[t].sort((u,v)=>bc(u)-bc(v));L[t].forEach((w,j)=>pos.set(w,(j+.5)/L[t].length));}}
+  G.layers=L;G.pos=pos;
+}
+function wavy(x1,y1,x2,y2,amp,wl){const Lh=Math.hypot(x2-x1,y2-y1),ux=(x2-x1)/Lh,uy=(y2-y1)/Lh,nx=-uy,ny=ux;
+  const N=Math.max(4,Math.round(Lh/wl*6));let d=`M${x1},${y1}`;
+  for(let j=1;j<=N;j++){const s=j/N*Lh,o=j<N?amp*Math.sin(2*Math.PI*s/wl):0;d+=` L${(x1+ux*s+nx*o).toFixed(1)},${(y1+uy*s+ny*o).toFixed(1)}`;}return d;}
+function drawGraph(){
+  const L=G.layers,maxW=Math.max(...L.map(l=>l.length));
+  if(G.interval.length>260){$("graph").setAttribute("viewBox","0 0 10 1");$("graph").innerHTML="";
+    $("gcap").textContent=`Интервал содержит ${G.interval.length} вершин — слишком много для рисунка.`;return;}
+  const showLab=maxW<=5,W=Math.max(320,maxW*(showLab?110:34)),dy=showLab?70:56,H=40+G.d*dy,rad=6;
+  const P=w=>[30+G.pos.get(w)*(W-60),22+G.DX.get(w)*dy];
+  const onPath=new Map(G.geo.words.map((w,t)=>[w,t]));
+  let g="";
+  for(const w of G.interval){const [x1,y1]=P(w);
+    for(const e of nbrs(w)){if(!G.pos.has(e.y)||G.DX.get(e.y)!==G.DX.get(w)+1)continue;const [x2,y2]=P(e.y);
+      const t=onPath.get(w);
+      if(t!==undefined&&G.geo.words[t+1]===e.y){
+        const Lh=Math.hypot(x2-x1,y2-y1),ux=(x2-x1)/Lh,uy=(y2-y1)/Lh;
+        g+=`<path d="${wavy(x1+ux*rad,y1+uy*rad,x2-ux*(rad+3),y2-uy*(rad+3),3.2,10)}" fill="none" stroke="${css("--ink")}" stroke-width="${t<G.step?2.4:1.4}" stroke-opacity="${t<G.step?1:.55}"/>`;
+        const ax=x2-ux*(rad+1),ay=y2-uy*(rad+1);
+        g+=`<path d="M${ax},${ay} L${ax-ux*8-uy*4},${ay-uy*8+ux*4} L${ax-ux*8+uy*4},${ay-uy*8-ux*4}Z" fill="${css("--ink")}"/>`;
+      } else g+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${css("--edge")}" stroke-width="1.1"/>`;}}
+  for(const w of G.interval){const [x,y]=P(w),t=onPath.get(w);
+    const fill=t!==undefined?tColor(t):css("--panel");
+    g+=`<circle cx="${x}" cy="${y}" r="${t!==undefined?rad+1:rad-1}" fill="${fill}" stroke="${css("--ink")}" stroke-width="${t===G.step?2.5:1}"><title>${w}  a = (${aVec(w).join(", ")})</title></circle>`;
+    if(showLab)g+=`<text x="${x+10}" y="${y-8}" font-size="11.5" fill="${css("--ink")}" font-family="JetBrains Mono,ui-monospace,monospace">(${w})</text>`;}
+  $("graph").setAttribute("viewBox",`0 0 ${W} ${H}`);$("graph").innerHTML=g;
+  $("gcap").textContent=`${G.interval.length} вершин на кратчайших путях из ${binom(G.n,G.k)}; слой t — расстояние от X. Цвет вершины пути = цвет струны в момент t.`;
+}
+
+/* ---------- gallery ---------- */
+function buildGallery(){const M=Math.min(G.N,120);let h="";
+  for(let j=0;j<M;j++){const geo=unrank(j),tb=tableauSVG(geo,G.d,{s:18,crop:true});
+    h+=`<button data-i="${j}" aria-label="Таблица ${j+1}"><svg viewBox="${tb.vb}">${tb.g}</svg>${j+1}</button>`;}
+  $("gallery").innerHTML=h;
+  $("galH").textContent=G.N<=120?`Все ${G.N} доминошные таблицы формы R(X,Y)`:`Первые 120 из ${G.N.toLocaleString()} доминошных таблиц`;
+  document.querySelectorAll(".gallery button").forEach(b=>{b.onclick=()=>select(+b.dataset.i);b.classList.toggle("sel",+b.dataset.i===G.idx);});
+}
+
+/* ---------- events ---------- */
+function rw(n,k){const a=[..."0".repeat(k)+"1".repeat(n-k)];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a.join("");}
+$("build").onclick=build;
+$("rand").onclick=()=>{const n=+$("n").value,k=+$("k").value;if(!(n>=3&&k>=1&&k<n))return msg("Нужно n ≥ 3 и 1 ≤ k < n.");
+  for(let t=0;t<500;t++){const X=rw(n,k),Y=rw(n,k),a=aVec(X),b=aVec(Y);if(X!==Y&&a.every((v,i)=>v<=b[i])){$("X").value=X;$("Y").value=Y;return build();}}msg("Не удалось найти сравнимую пару.");};
+$("pre1").onclick=()=>{$("X").value="00011";$("Y").value="11000";build();};
+$("pre2").onclick=()=>{$("X").value="000111";$("Y").value="111000";build();};
+$("pre3").onclick=()=>{$("X").value="00001111";$("Y").value="11110000";build();};
+$("start").onclick=()=>G.timer?stop():play();
+$("step").onclick=()=>{stop();if(G.step<G.d){G.step++;G.fresh=true;renderAll();}};
+$("back").onclick=()=>{stop();if(G.step>0){G.step--;renderAll();}};
+$("reset").onclick=()=>{stop();G.step=0;renderAll();};
+$("prev").onclick=()=>select(G.idx-1);
+$("next").onclick=()=>select(G.idx+1);
+$("rnd").onclick=()=>select(Math.floor(Math.random()*G.N));
+$("speed").oninput=()=>{if(G.timer){stop();play();}};
+$("help").onclick=()=>$("dlg").showModal();$("close").onclick=()=>$("dlg").close();
+["X","Y"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")build();}));
+document.addEventListener("keydown",e=>{if(["INPUT","TEXTAREA"].includes(document.activeElement.tagName)||$("dlg").open)return;
+  if(e.key===" "){e.preventDefault();$("start").click();}else if(e.key==="ArrowRight")$("step").click();else if(e.key==="ArrowLeft")$("back").click();});
+build();
+</script>
+</body>
+</html>
