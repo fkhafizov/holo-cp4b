@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LRX: почему нет точной голографии</title>
+<style>
+:root{--bg:#fbfaf7;--card:#fff;--ink:#1f2328;--mute:#5b6270;--line:#e3e0d8;
+--plus:#c0392b;--minus:#1f5fa8;--same:#2e8b57;--opp:#9aa0aa;--warn:#d9822b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 20px 60px}
+h1{font-size:26px;margin:0 0 6px}
+h2{font-size:20px;margin:0 0 8px}
+p{margin:0 0 10px;max-width:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:18px 0}
+.step{display:inline-block;background:#1f2328;color:#fff;border-radius:999px;font-size:13px;padding:2px 10px;margin-right:8px;vertical-align:2px}
+.row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.row>svg{flex:1 1 420px;max-width:100%;height:auto}
+.side{flex:1 1 300px}
+.box{background:#f6f4ef;border-radius:10px;padding:10px 14px;margin:8px 0}
+.big{font-size:20px;font-weight:600}
+.g{color:var(--same);font-weight:600}.o{color:#6b7280;font-weight:600}
+.pl{color:var(--plus);font-weight:600}.mi{color:var(--minus);font-weight:600}
+.bad{color:var(--plus);font-weight:700}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:center}
+th{background:#f6f4ef}
+button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;cursor:pointer}
+button.on{background:#1f2328;color:#fff;border-color:#1f2328}
+.math{font-family:"Cambria Math","STIX Two Math","Times New Roman",serif;font-size:18px}
+svg text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.pt{cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Почему у LRX (два нуля) нет точной голографии — по шагам, в картинках</h1>
+<p>Голография раскладывает расстояние на <b>заборы</b>: площадь между профилями двух слов — это число заборов, стоящих между ними. Мы покажем простое правило, которое выполняется для <i>любого</i> набора заборов, и пять слов графа LRX, для которых настоящие расстояния это правило нарушают. Значит, никакой многоугольник не даст точную голографию.</p>
+
+<!-- STEP 1 -->
+<div class="card">
+<h2><span class="step">Шаг 1</span>Голография = заборы</h2>
+<div class="row">
+<svg viewBox="0 0 520 250" id="fig1"></svg>
+<div class="side">
+<p>Каждая клетка многоугольника — это забор: он делит все слова на «до» и «после». Профиль слова показывает, какие заборы оно уже перешло.</p>
+<div class="box">Площадь между <b>X</b> и <b>Y</b> = число заборов, которые надо перелезть, чтобы дойти от X до Y.</div>
+<p>На картинке между X и Y стоят заборы 1 и 2, а забор 3 их не разделяет. Площадь равна <b>2</b>.</p>
+<p>Точная голография означает: для <i>любых</i> двух слов число заборов между ними равно расстоянию в графе.</p>
+</div></div></div>
+
+<!-- STEP 2 -->
+<div class="card">
+<h2><span class="step">Шаг 2</span>Пять слов и два цвета пар</h2>
+<div class="row">
+<svg viewBox="0 0 520 330" id="fig2"></svg>
+<div class="side">
+<p>Возьмём пять слов. Три отметим знаком <span class="pl">«+»</span> (красные кружки), два — знаком <span class="mi">«−»</span> (синие квадраты).</p>
+<p>Пять точек дают 10 пар. Раскрасим их:</p>
+<div class="box"><span class="g">зелёные (сплошные)</span> — пары с одинаковым знаком: три пары «+ +» и одна пара «− −». Всего <b>4</b>.</div>
+<div class="box"><span class="o">серые (пунктир)</span> — пары с разными знаками: каждый «+» с каждым «−». Всего 3·2 = <b>6</b>.</div>
+</div></div></div>
+
+<!-- STEP 3 -->
+<div class="card">
+<h2><span class="step">Шаг 3</span>Один забор: попробуйте сами</h2>
+<div class="row">
+<svg viewBox="0 0 520 330" id="fig3"></svg>
+<div class="side">
+<p>Вертикальная линия — забор. <b>Нажимайте на слова</b>, чтобы перекинуть их на другую сторону. Жирно выделены пары, которые забор разрезает.</p>
+<div class="box">
+<div>разрезано <span class="g">зелёных</span>: <span class="big" id="cg">0</span></div>
+<div>разрезано <span class="o">серых</span>: <span class="big" id="co">0</span></div>
+<div style="margin-top:6px">зелёные − серые = <span class="big" id="cd">0</span></div>
+</div>
+<p id="verdict"></p>
+<p><button id="rnd">Случайный забор</button> <button id="rst">Сброс</button></p>
+</div></div>
+<p style="margin-top:12px"><b>Все случаи сразу.</b> Пусть на левой стороне забора <i>p</i> плюсов и <i>q</i> минусов. Тогда:</p>
+<table id="tab"></table>
+<p style="color:#5b6270;font-size:14px">Остальные случаи — те же самые, если посмотреть с другой стороны забора.</p>
+<div class="box" style="margin-top:12px"><b>Правило забора:</b> любой забор разрезает зелёных пар <b>не больше</b>, чем серых. Разность всегда 0 или отрицательна.</div>
+</div>
+
+<!-- STEP 4 -->
+<div class="card">
+<h2><span class="step">Шаг 4</span>Складываем все заборы</h2>
+<p>В голографии много заборов. Площадь каждой пары — это сумма по заборам (каждый забор даёт 1, если разрезает пару, иначе 0). Значит:</p>
+<div class="box math" style="text-align:center">
+(сумма площадей по <span class="g">зелёным</span> парам) − (сумма площадей по <span class="o">серым</span> парам)<br>
+= Σ<sub>заборы</sub> (зелёных разрезано − серых разрезано) ≤ 0.
+</div>
+<p><b>Аналогия:</b> каждый забор — это «налог». Каждый из них берёт с серых пар не меньше, чем с зелёных, поэтому и в сумме серые всегда платят не меньше. Это верно для <i>любой</i> голографии, при любом многоугольнике и любых высотах клеток.</p>
+<div class="box">Если голография точна, площадь = расстоянию. Значит, для настоящих расстояний должно быть: <b>сумма по зелёным ≤ сумма по серым.</b></div>
+</div>
+
+<!-- STEP 5 -->
+<div class="card">
+<h2><span class="step">Шаг 5</span>Настоящие расстояния в LRX</h2>
+<div class="row">
+<svg viewBox="0 0 520 330" id="fig5"></svg>
+<div class="side">
+<p>Вот наши пять слов (позиции нулей, N ≥ 10):</p>
+<p><span class="pl">A = {0,1}</span>, <span class="pl">R = {2,N−1}</span>, <span class="pl">W = {3,N−2}</span>, <span class="mi">U₂ = {0,2}</span>, <span class="mi">V = {1,N−2}</span>.</p>
+<p>На рёбрах подписаны расстояния в графе.</p>
+<div class="box">
+<div><span class="g">зелёные</span>: 5 + 10 + 7 + 3 = <span class="big">25</span></div>
+<div><span class="o">серые</span>: 2 + 4 + 3 + 1 + 8 + 6 = <span class="big">24</span></div>
+</div>
+<p class="bad">25 &gt; 24 — правило шага 4 нарушено. Значит, точной голографии нет.</p>
+</div></div></div>
+
+<!-- STEP 6 -->
+<div class="card">
+<h2><span class="step">Шаг 6</span>Откуда лишняя единица: лестница</h2>
+<div class="row">
+<svg viewBox="0 0 520 430" id="fig6"></svg>
+<div class="side">
+<p>Граф LRX похож на лестницу: две «улицы» (левый и правый столбы) сходятся наверху в A, а между ними перекладины.</p>
+<p><button id="p1" class="on">путь U₂ → W напрямую</button></p>
+<p><button id="p2">путь U₂ → V → W</button></p>
+<div class="box" id="pathinfo"></div>
+<p>U₂ и W доступны с одной (левой) улицы: <b>8 шагов</b>. A V стоит на другой улице. Чтобы зайти к V, надо перейти с улицы на улицу, а переход стоит лишний шаг: <b>3 + 6 = 9</b>.</p>
+<p>Заборы такой «платы за переход» устроить не могут. Если бы расстояния были заборными, V обязан был бы лежать на кратчайшем пути от U₂ к W. Ровно эта лишняя единица и даёт 25 против 24.</p>
+</div></div></div>
+
+<!-- STEP 7 -->
+<div class="card">
+<h2><span class="step">Шаг 7</span>Насколько плохо: ошибка не меньше 1/6</h2>
+<p>Пусть голография точна хотя бы от A (площадь под профилем = расстоянию до A). Тогда 4 пары с A ошибки не имеют. Недостача в 1 должна поместиться в оставшиеся <b>6 пар</b>. Лучше всего — поровну, по 1/6 на пару. Поэтому максимальная ошибка любой такой голографии <b>не меньше 1/6</b>. При N = 4, 5 компьютер находит голографию ровно с ошибкой 1/6.</p>
+</div>
+
+<!-- STEP 8 -->
+<div class="card">
+<h2><span class="step">Шаг 8</span>Самый маленький случай N = 4: LRX против cc2</h2>
+<p>Возьмём самые короткие слова: длина 4, два нуля. Таких слов всего <b>шесть</b>: 0011, 0101, 0110, 1001, 1010, 1100. Графы cc2 и LRX состоят из <i>одних и тех же</i> шести слов, различаются только дороги между ними.</p>
+<table style="margin:8px 0 14px">
+<tr><th>граф</th><th>ход</th><th>что происходит с нулями</th></tr>
+<tr><td><b>cc2</b></td><td>поменять две соседние буквы</td><td>один ноль сдвигается на один шаг</td></tr>
+<tr><td><b>LRX</b></td><td>циклически сдвинуть всё слово на одну позицию (L — влево, R — вправо) или поменять первые две буквы (X)</td><td>при сдвиге <i>оба</i> нуля смещаются на одну позицию сразу; последняя буква переходит в начало (или первая — в конец)</td></tr>
+</table>
+
+<h2 style="font-size:17px">8а. Правило квадрата (верно в любом мире заборов)</h2>
+<div class="row">
+<svg viewBox="0 0 520 300" id="fig8a"></svg>
+<div class="side">
+<p>Пусть четыре слова образуют <b>квадрат</b>: стороны длины 1, обе диагонали длины 2. Обозначим углы одной диагонали <span style="color:#7b3fa0;font-weight:600">P, Q</span>, другой — <span style="color:#16857a;font-weight:600">A, B</span>.</p>
+<div class="box"><b>Правило квадрата.</b> Если голография точна, то для любого слова C:<br>
+<span class="math">d(C,P) + d(C,Q) = d(C,A) + d(C,B).</span></div>
+<p><b>Почему.</b> Посмотрим, как забор может пройти мимо квадрата (на рисунке):</p>
+<p>① и ② — забор режет квадрат пополам. С каждой стороны тогда ровно один угол каждой диагонали. Слово C стоит с одной стороны, поэтому этот забор добавляет <b>1</b> к обеим суммам.</p>
+<p>③ — забор обходит квадрат. Тогда C либо вместе с квадратом (+0 к обеим суммам), либо отдельно от всех четырёх углов (+2 к обеим суммам).</p>
+<p>Других заборов не бывает. Путь P → A → Q кратчайший (1 + 1 = 2), поэтому каждый забор, который мы пересекаем на этом пути, отделяет P от Q — иначе путь через A был бы длиннее, чем расстояние. То же верно для всех четырёх углов, и остаются только ①, ②, ③.</p>
+<p>Итак, каждый забор прибавляет к двум суммам <b>одинаково</b> — значит, суммы равны.</p>
+</div></div>
+
+<h2 style="font-size:17px;margin-top:14px">8б. Проверим: нажмите на любое слово вне квадрата</h2>
+<div class="row">
+<div style="flex:1 1 420px"><p style="text-align:center;font-weight:600;margin:0">cc2 (обмен соседних букв)</p><svg viewBox="0 0 520 360" id="fig8cc2" style="width:100%;height:auto"></svg><div class="box" id="info8cc2"></div></div>
+<div style="flex:1 1 420px"><p style="text-align:center;font-weight:600;margin:0">LRX (циклический сдвиг + обмен первых двух букв)</p><svg viewBox="0 0 520 360" id="fig8lrx" style="width:100%;height:auto"></svg><div class="box" id="info8lrx"></div></div>
+</div>
+<div class="row" style="margin-top:6px">
+<div class="side">
+<p><b>cc2.</b> Каждое слово — точка (a₁, a₂) на клетчатой бумаге, a₁ = позиция первого нуля, a₂ = позиция второго нуля − 1. Ход сдвигает точку на одну клетку. <b>Коричневые пунктирные линии — это и есть заборы</b>, и расстояние = число пересечённых линий. Квадрат 0101–0110–1010–1001 — настоящий квадрат клетки, и правило выполняется для любого C.</p>
+</div>
+<div class="side">
+<p><b>LRX.</b> На каждом ребре написано действие: <b style="color:#1f5fa8">L</b> — циклический сдвиг всего слова на одну позицию влево, <b style="color:#2e8b57">R</b> — вправо, <b style="color:#c0392b">X</b> — обмен букв в позициях 0 и 1 (для ребра X → Y берём X &lt; Y по алфавиту). Нажмите на букву — в обоих словах подсветятся позиции, которые меняются. Квадрат 0011–0110–1100–1001 (стороны 1, диагонали 2) целиком состоит из сдвигов L/R. Но есть ещё <b>третья дорога</b> 0110 → 1010 → 0101 → 1001 длины 3: обмен X, сдвиг, снова обмен X. Слово C = 0101 стоит на ней рядом с углом 1001:</p>
+<p class="math" style="text-align:center">d(C,0011) + d(C,1100) = 2 + 2 = <b>4</b><br>d(C,0110) + d(C,1001) = 2 + 1 = <b class="bad">3</b></p>
+<p class="bad">4 ≠ 3 — правило квадрата нарушено, значит при N = 4 точной голографии нет.</p>
+</div></div>
+
+<h2 style="font-size:17px;margin-top:14px">8в. В чём разница одной фразой</h2>
+<div class="box">В cc2 каждая дорога — шаг на одну клетку, и заборы — просто линии сетки, поэтому правило квадрата выполняется само собой. В LRX к квадрату добавлена <b>третья дорога</b> (циклический сдвиг слова двигает оба нуля сразу). Вместе с квадратом она даёт цикл из 5 слов 0011 → 0110 → 1010 → 0101 → 1001 → 0011, и слово 0101 на этой дороге оказывается ближе к одной диагонали квадрата (сумма 3), чем к другой (сумма 4). Заборы так не умеют.</div>
+<p>Для больших N картина та же, только «квадрат» и «третья дорога» длиннее. Для N ≥ 10 удобнее пять слов из шагов 2–5: в cc2 для них сумма по зелёным парам 29 ≤ 31 по серым (правило выполнено), а в LRX 25 &gt; 24 (нарушено).</p>
+</div>
+</div>
+
+<script>
+const NS="http://www.w3.org/2000/svg";
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+function txt(p,x,y,s,a={}){const t=el("text",Object.assign({x,y,"text-anchor":"middle","font-size":14,fill:"#1f2328"},a),p);t.textContent=s;return t}
+const C={plus:"#c0392b",minus:"#1f5fa8",same:"#2e8b57",opp:"#9aa0aa"};
+
+/* ---------- fig1: fences ---------- */
+(function(){
+ const s=document.getElementById("fig1");
+ el("rect",{x:0,y:0,width:520,height:250,fill:"#fbfaf7",rx:10},s);
+ const fences=[[170,"1"],[300,"2"],[440,"3"]];
+ fences.forEach(([x,l])=>{
+   el("path",{d:`M${x} 50 q8 20 0 40 q-8 20 0 40 q8 20 0 40 q-8 20 0 40`,stroke:"#8b5a2b","stroke-width":4,fill:"none","stroke-linecap":"round"},s);
+   txt(s,x,240,"забор "+l,{"font-size":13,fill:"#8b5a2b"});
+ });
+ el("line",{x1:90,y1:135,x2:380,y2:135,stroke:"#d9822b","stroke-width":2.5,"stroke-dasharray":"6 4"},s);
+ [[90,"X"],[380,"Y"]].forEach(([x,l])=>{el("circle",{cx:x,cy:135,r:16,fill:"#fff",stroke:"#1f2328","stroke-width":2},s);txt(s,x,140,l,{"font-weight":700})});
+ txt(s,235,28,"от X до Y пересекаем 2 забора → площадь 2",{"font-size":13,fill:"#d9822b"});
+})();
+
+/* ---------- pentagon geometry ---------- */
+const P=[ // name, sign, x, y
+ ["A","+",260,45],["R","+",470,150],["W","+",385,295],["U₂","−",135,295],["V","−",50,150]];
+function drawPent(svg,opts){
+ svg.innerHTML="";
+ el("rect",{x:0,y:0,width:520,height:330,fill:"#fbfaf7",rx:10},svg);
+ const pos=opts.pos||P.map(p=>[p[2],p[3]]);
+ const edges=[];
+ for(let i=0;i<5;i++)for(let j=i+1;j<5;j++)edges.push([i,j,P[i][1]===P[j][1]]);
+ const g=el("g",{},svg);
+ edges.forEach(([i,j,same])=>{
+  const cut=opts.side?opts.side[i]!==opts.side[j]:false;
+  const a={x1:pos[i][0],y1:pos[i][1],x2:pos[j][0],y2:pos[j][1],stroke:same?C.same:C.opp,
+   "stroke-width":cut?5:(same?2.5:1.8)};
+  if(!same)a["stroke-dasharray"]="6 5";
+  if(opts.side&&!cut)a.opacity=.35;
+  el("line",a,g);
+  if(opts.labels){const d=opts.labels[i+","+j];const mx=(pos[i][0]+pos[j][0])/2,my=(pos[i][1]+pos[j][1])/2;
+   el("rect",{x:mx-13,y:my-11,width:26,height:20,rx:5,fill:"#fff",stroke:same?C.same:C.opp},g);
+   txt(g,mx,my+4,d,{"font-size":13,"font-weight":700,fill:same?C.same:"#555"});}
+ });
+ P.forEach((p,i)=>{
+  const [x,y]=pos[i];const gg=el("g",{class:"pt","data-i":i},svg);
+  if(p[1]==="+")el("circle",{cx:x,cy:y,r:20,fill:"#fff",stroke:C.plus,"stroke-width":3},gg);
+  else el("rect",{x:x-19,y:y-19,width:38,height:38,rx:4,fill:"#fff",stroke:C.minus,"stroke-width":3},gg);
+  txt(gg,x,y+5,p[0],{"font-weight":700,fill:p[1]==="+"?C.plus:C.minus});
+  txt(gg,x+24,y-16,p[1],{"font-size":16,"font-weight":700,fill:p[1]==="+"?C.plus:C.minus});
+ });
+ return svg;
+}
+drawPent(document.getElementById("fig2"),{});
+
+/* ---------- fig3: interactive fence ---------- */
+const fig3=document.getElementById("fig3");
+let side=[0,1,1,0,0]; // 0 = left, 1 = right
+const left=[[90,60],[90,140],[90,220],[150,100],[150,260]];
+function layout(){
+ // place points by side, keeping order
+ const L=[],R=[];side.forEach((s,i)=>(s?R:L).push(i));
+ const pos=[];
+ const place=(arr,x0)=>arr.forEach((i,k)=>{const n=arr.length;const y=45+(n===1?120:k*240/(n-1));pos[i]=[x0+(k%2)*70,y]});
+ place(L,70);place(R,360);
+ return pos;
+}
+function draw3(){
+ const pos=layout();
+ drawPent(fig3,{pos,side});
+ el("path",{d:"M260 10 q10 25 0 50 q-10 25 0 50 q10 25 0 50 q-10 25 0 50 q10 25 0 50 q-10 25 0 50",stroke:"#8b5a2b","stroke-width":5,fill:"none"},fig3);
+ txt(fig3,130,322,"левая сторона",{"font-size":12,fill:"#5b6270"});txt(fig3,400,322,"правая сторона",{"font-size":12,fill:"#5b6270"});
+ let g=0,o=0;
+ for(let i=0;i<5;i++)for(let j=i+1;j<5;j++)if(side[i]!==side[j]){if(P[i][1]===P[j][1])g++;else o++;}
+ document.getElementById("cg").textContent=g;document.getElementById("co").textContent=o;
+ document.getElementById("cd").textContent=(g-o>0?"+":"")+(g-o);
+ const v=document.getElementById("verdict");
+ v.innerHTML=(g===0&&o===0)?"Забор никого не разделяет — вклад 0.":(g<=o?`Зелёных разрезано не больше, чем серых: <b>${g} ≤ ${o}</b>.`:"(так не бывает)");
+ fig3.querySelectorAll(".pt").forEach(n=>n.addEventListener("click",()=>{const i=+n.dataset.i;side[i]=1-side[i];draw3();}));
+}
+document.getElementById("rnd").onclick=()=>{do{side=side.map(()=>Math.random()<.5?0:1)}while(side.every(s=>s===side[0]));draw3()};
+document.getElementById("rst").onclick=()=>{side=[0,1,1,0,0];draw3()};
+draw3();
+
+/* table of all cases */
+(function(){
+ const t=document.getElementById("tab");
+ let h="<tr><th>слева плюсов p</th><th>слева минусов q</th><th>разрезано зелёных<br>p(3−p)+q(2−q)</th><th>разрезано серых<br>p(2−q)+q(3−p)</th><th>зелёные − серые</th></tr>";
+ const seen=new Set();
+ for(let p=0;p<=3;p++)for(let q=0;q<=2;q++){
+  if(p+q===0||p+q===5)continue;
+  const key=[p,q].join()<[3-p,2-q].join()?[p,q].join():[3-p,2-q].join(); if(seen.has(key))continue;seen.add(key);
+  const g=p*(3-p)+q*(2-q),o=p*(2-q)+q*(3-p);
+  h+=`<tr><td>${p}</td><td>${q}</td><td class="g">${g}</td><td class="o">${o}</td><td><b>${g-o}</b></td></tr>`;
+ }
+ t.innerHTML=h;
+})();
+
+/* ---------- fig5: LRX distances ---------- */
+drawPent(document.getElementById("fig5"),{labels:{"0,1":5,"0,2":10,"1,2":7,"3,4":3,"0,3":2,"0,4":4,"1,3":3,"1,4":1,"2,3":8,"2,4":6}});
+
+/* ---------- fig6: ladder ---------- */
+const fig6=document.getElementById("fig6");
+const LX=90,RX=430,Y0=40,DY=42,y=u=>Y0+u*DY;
+const NODES={A:[260,Y0-6]};
+for(let u=1;u<=8;u++){NODES["L"+u]=[LX,y(u)];NODES["R"+u]=[RX,y(u)];}
+NODES.Rw=[260,y(4)];NODES.s1=[200,y(6)];NODES.s2=[320,y(6)];NODES.w1=[175,y(8)];NODES.W=[260,y(8)];NODES.w2=[345,y(8)];
+const E=[["A","L1"],["A","R1"]];
+for(let u=1;u<8;u++){E.push(["L"+u,"L"+(u+1)]);E.push(["R"+u,"R"+(u+1)]);}
+E.push(["L2","R2"],["L4","Rw"],["Rw","R4"],["L6","s1"],["s1","s2"],["s2","R6"],["L8","w1"],["w1","W"],["W","w2"],["w2","R8"]);
+const PATH1=["L2","L3","L4","L5","L6","L7","L8","w1","W"];
+const PATH2=["L2","R2","R3","R4","R5","R6","R7","R8","w2","W"];
+function draw6(which){
+ fig6.innerHTML="";
+ el("rect",{x:0,y:0,width:520,height:430,fill:"#fbfaf7",rx:10},fig6);
+ for(let u=1;u<=8;u++)txt(fig6,28,y(u)+5,"ур. "+u,{"font-size":12,fill:"#5b6270"});
+ [1,3,5,7].forEach(u=>{el("line",{x1:LX,y1:y(u),x2:LX+45,y2:y(u)+14,stroke:"#bbb","stroke-dasharray":"4 4"},fig6);el("line",{x1:RX,y1:y(u),x2:RX-45,y2:y(u)+14,stroke:"#bbb","stroke-dasharray":"4 4"},fig6)});
+ E.forEach(([a,b])=>el("line",{x1:NODES[a][0],y1:NODES[a][1],x2:NODES[b][0],y2:NODES[b][1],stroke:"#9aa0aa","stroke-width":2},fig6));
+ const path=which===1?PATH1:PATH2,col=which===1?"#2e8b57":"#d9822b";
+ for(let k=0;k<path.length-1;k++){const a=NODES[path[k]],b=NODES[path[k+1]];
+  el("line",{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:col,"stroke-width":6,"stroke-linecap":"round",opacity:.85},fig6);
+  txt(fig6,(a[0]+b[0])/2+(a[0]===b[0]?(a[0]<260?-14:14):0),(a[1]+b[1])/2+(a[0]===b[0]?4:-8),k+1,{"font-size":11,fill:col,"font-weight":700});}
+ Object.entries(NODES).forEach(([k,[x,yy]])=>el("circle",{cx:x,cy:yy,r:4,fill:"#5b6270"},fig6));
+ const mark=(k,label,sign)=>{const [x,yy]=NODES[k];
+  if(sign==="+")el("circle",{cx:x,cy:yy,r:15,fill:"#fff",stroke:C.plus,"stroke-width":3},fig6);
+  else el("rect",{x:x-14,y:yy-14,width:28,height:28,rx:4,fill:"#fff",stroke:C.minus,"stroke-width":3},fig6);
+  txt(fig6,x,yy+5,label,{"font-size":13,"font-weight":700,fill:sign==="+"?C.plus:C.minus});};
+ mark("A","A","+");mark("Rw","R","+");mark("W","W","+");mark("L2","U₂","−");mark("R4","V","−");
+ txt(fig6,LX,422,"левая улица",{"font-size":12,fill:"#5b6270"});txt(fig6,RX,422,"правая улица",{"font-size":12,fill:"#5b6270"});
+ txt(fig6,260,y(2)-8,"переход (1 шаг)",{"font-size":11,fill:"#5b6270"});
+ document.getElementById("pathinfo").innerHTML=which===1
+  ?'<span class="g">U₂ → W напрямую:</span> 6 шагов вниз по левой улице + 2 по перекладине = <b>8</b>.'
+  :'<span style="color:#d9822b;font-weight:600">U₂ → V → W:</span> переход на правую улицу (1) + 2 вниз до V = 3, затем 4 вниз + 2 по перекладине = 6. Всего <b>9</b>.';
+ document.getElementById("p1").className=which===1?"on":"";document.getElementById("p2").className=which===2?"on":"";
+}
+document.getElementById("p1").onclick=()=>draw6(1);document.getElementById("p2").onclick=()=>draw6(2);
+draw6(1);
+
+/* ---------- STEP 8 ---------- */
+(function(){
+ // 8a: square rule picture
+ const f=document.getElementById("fig8a");
+ el("rect",{x:0,y:0,width:520,height:300,fill:"#fbfaf7",rx:10},f);
+ const sq={P:[150,70],A:[290,70],Q:[290,210],B:[150,210]};
+ el("rect",{x:150,y:70,width:140,height:140,fill:"#fff7d6",stroke:"#bbb"},f);
+ const fence=(d,c)=>el("path",{d,stroke:c||"#8b5a2b","stroke-width":4,fill:"none","stroke-linecap":"round"},f);
+ fence("M220 30 q8 20 0 40 q-8 20 0 40 q8 20 0 40 q-8 20 0 40 q8 20 0 40 q-8 20 0 30");
+ fence("M110 140 q20 8 40 0 q20 -8 40 0 q20 8 40 0 q20 -8 40 0 q20 8 40 0 q20 -8 40 0");
+ el("ellipse",{cx:430,cy:140,rx:55,ry:45,fill:"none",stroke:"#8b5a2b","stroke-width":3.5,"stroke-dasharray":"9 6"},f);
+ txt(f,232,26,"①",{"font-size":16,fill:"#8b5a2b"});txt(f,98,146,"②",{"font-size":16,fill:"#8b5a2b"});txt(f,485,96,"③",{"font-size":16,fill:"#8b5a2b"});
+ const col={P:"#7b3fa0",Q:"#7b3fa0",A:"#16857a",B:"#16857a"};
+ Object.entries(sq).forEach(([k,[x,y]])=>{el("circle",{cx:x,cy:y,r:17,fill:"#fff",stroke:col[k],"stroke-width":3},f);txt(f,x,y+5,k,{"font-weight":700,fill:col[k]})});
+ el("circle",{cx:430,cy:140,r:17,fill:"#fff",stroke:"#d9822b","stroke-width":3},f);txt(f,430,145,"C",{"font-weight":700,fill:"#d9822b"});
+ el("line",{x1:150,y1:70,x2:290,y2:210,stroke:"#7b3fa0","stroke-dasharray":"3 4"},f);
+ el("line",{x1:290,y1:70,x2:150,y2:210,stroke:"#16857a","stroke-dasharray":"3 4"},f);
+ txt(f,220,285,"① и ②: +1 к обеим суммам;  ③: +0 или +2 к обеим",{"font-size":13,fill:"#5b6270"});
+
+ // graphs
+ const words=["0011","0101","0110","1001","1010","1100"];
+ function bfsAll(E){const adj={};words.forEach(w=>adj[w]=[]);E.forEach(([a,b])=>{adj[a].push(b);adj[b].push(a)});
+  const D={};words.forEach(s=>{const d={[s]:0},q=[s];while(q.length){const x=q.shift();adj[x].forEach(y=>{if(!(y in d)){d[y]=d[x]+1;q.push(y)}})}D[s]=d});return D;}
+ const G={
+  cc2:{E:[["0011","0101"],["0101","0110"],["0101","1001"],["0110","1010"],["1001","1010"],["1010","1100"]],
+   pos:{"0011":[120,300],"0101":[120,190],"0110":[120,80],"1001":[250,190],"1010":[250,80],"1100":[380,80]},
+   diag1:["0101","1010"],diag2:["0110","1001"],start:"0011"},
+  lrx:{E:[["0011","0110"],["0011","1001"],["0101","1001"],["0101","1010"],["0110","1010"],["0110","1100"],["1001","1100"]],
+   pos:{"0011":[260,45],"0110":[130,150],"1001":[390,150],"1100":[260,255],"1010":[170,320],"0101":[350,320]},
+   diag1:["0011","1100"],diag2:["0110","1001"],start:"0101"}};
+ Object.values(G).forEach(g=>g.D=bfsAll(g.E));
+ let sel8=null; const lastC={};
+ const ACT={L:w=>w.slice(1)+w[0],R:w=>w[w.length-1]+w.slice(0,-1),X:w=>w[1]+w[0]+w.slice(2)};
+ const ACOL={L:"#1f5fa8",R:"#2e8b57",X:"#c0392b"};
+ const ADESC={L:"циклический сдвиг всего слова на одну позицию влево",R:"циклический сдвиг всего слова на одну позицию вправо",X:"обмен букв в позициях 0 и 1"};
+ function actionOf(X,Y){for(const k of ["L","R","X"])if(ACT[k](X)===Y)return k;return "?";}
+ function draw8(name,C){
+  const g=G[name],svg=document.getElementById("fig8"+name);svg.innerHTML="";
+  el("rect",{x:0,y:0,width:520,height:360,fill:"#fbfaf7",rx:10},svg);
+  const sqw=[...g.diag1,...g.diag2],P=g.pos;
+  if(name==="cc2"){
+   [185,315].forEach(x=>el("line",{x1:x,y1:40,x2:x,y2:335,stroke:"#8b5a2b","stroke-width":2,"stroke-dasharray":"6 5",opacity:.7},svg));
+   [245,135].forEach(y=>el("line",{x1:70,y1:y,x2:430,y2:y,stroke:"#8b5a2b","stroke-width":2,"stroke-dasharray":"6 5",opacity:.7},svg));
+   txt(svg,465,350,"a₁ →",{"font-size":12,fill:"#5b6270"});txt(svg,40,40,"a₂ ↑",{"font-size":12,fill:"#5b6270"});
+   [0,1,2].forEach(i=>txt(svg,120+i*130,350,String(i),{"font-size":12,fill:"#5b6270"}));
+   [0,1,2].forEach(i=>txt(svg,60,304-i*110,String(i),{"font-size":12,fill:"#5b6270"}));
+  }
+  const poly=(name==="cc2"?["0101","0110","1010","1001"]:["0011","0110","1100","1001"]).map(w=>P[w].join(",")).join(" ");
+  el("polygon",{points:poly,fill:"#fff7d6",stroke:"none"},svg);
+  // third road highlight for lrx
+  lastC[name]=C;
+  const hi={};  // word -> set of highlighted bit positions
+  let selInfo="";
+  g.E.forEach(([a,b],ei)=>{const third=name==="lrx"&&[a,b].some(w=>w==="1010"||w==="0101");
+   const isSel=name==="lrx"&&sel8===ei;
+   el("line",{x1:P[a][0],y1:P[a][1],x2:P[b][0],y2:P[b][1],stroke:isSel?"#f2b705":(third?"#d9822b":"#5b6270"),"stroke-width":isSel?7:(third?4:2.5)},svg);
+   if(name==="lrx"){
+    const [X,Y]=[a,b].sort(), act=actionOf(X,Y), mx=(P[a][0]+P[b][0])/2, my=(P[a][1]+P[b][1])/2;
+    const diff=[...X].map((ch,i)=>ch!==Y[i]?i:-1).filter(i=>i>=0);
+    const lg=el("g",{style:"cursor:pointer"},svg);el("title",{},lg).textContent=X+" → "+Y+": "+act;
+    el("circle",{cx:mx,cy:my,r:13,fill:isSel?"#f2b705":"#fff",stroke:ACOL[act],"stroke-width":2.5},lg);
+    txt(lg,mx,my+5,act,{"font-size":14,"font-weight":800,fill:isSel?"#1f2328":ACOL[act]});
+    lg.addEventListener("click",ev=>{ev.stopPropagation();sel8=(sel8===ei?null:ei);draw8("lrx",lastC.lrx)});
+    if(isSel){hi[X]=new Set(diff);hi[Y]=new Set(diff);
+     selInfo=`<div style="margin-top:6px;padding-top:6px;border-top:1px solid #e3e0d8">ребро <b>${X}</b> → <b>${Y}</b>: действие <b style="color:${ACOL[act]}">${act}</b> (${ADESC[act]})<br>меняются позиции <b>${diff.join(", ")}</b> (подсвечены жёлтым)</div>`;}
+   }});
+  if(name==="lrx")txt(svg,260,348,"третья дорога (оранжевая), длина 3",{"font-size":12,fill:"#d9822b"});
+  words.forEach(w=>{const [x,y]=P[w];const inSq=sqw.includes(w);
+   const c=g.diag1.includes(w)?"#7b3fa0":g.diag2.includes(w)?"#16857a":(w===C?"#d9822b":"#9aa0aa");
+   const gg=el("g",{style:inSq?"":"cursor:pointer"},svg);
+   if(name==="lrx"){
+    el("rect",{x:x-34,y:y-17,width:68,height:34,rx:12,fill:w===C?"#fde7d2":"#fff",stroke:c,"stroke-width":3},gg);
+    [...w].forEach((ch,i)=>{const cx=x-21+i*14;
+     if(hi[w]&&hi[w].has(i))el("rect",{x:cx-7,y:y-14,width:14,height:19,rx:3,fill:"#f2b705"},gg);
+     txt(gg,cx,y+1,ch,{"font-size":14,"font-weight":700,fill:c});
+     txt(gg,cx,y+13,String(i),{"font-size":8,fill:"#9aa0aa"});});
+   }else{
+    el("rect",{x:x-30,y:y-15,width:60,height:30,rx:15,fill:w===C?"#fde7d2":"#fff",stroke:c,"stroke-width":3},gg);
+    txt(gg,x,y+5,w,{"font-size":13,"font-weight":700,fill:c});
+   }
+   if(!inSq)gg.addEventListener("click",()=>draw8(name,w));
+   if(!inSq&&w!==C)txt(svg,x,name==="lrx"?y-24:y-22,"нажми",{"font-size":10,fill:"#9aa0aa"});
+  });
+  const d=g.D[C];const s1=d[g.diag1[0]]+d[g.diag1[1]],s2=d[g.diag2[0]]+d[g.diag2[1]];
+  const ok=s1===s2;
+  document.getElementById("info8"+name).innerHTML=
+   `C = <b>${C}</b><br><span style="color:#7b3fa0;font-weight:600">${g.diag1[0]}, ${g.diag1[1]}</span>: ${d[g.diag1[0]]} + ${d[g.diag1[1]]} = <b>${s1}</b><br>`+
+   `<span style="color:#16857a;font-weight:600">${g.diag2[0]}, ${g.diag2[1]}</span>: ${d[g.diag2[0]]} + ${d[g.diag2[1]]} = <b>${s2}</b><br>`+
+   (ok?'<span class="g">суммы равны — правило выполнено</span>':'<span class="bad">суммы разные — правило нарушено</span>')+
+   (name==="lrx"?(selInfo||'<div style="margin-top:6px;padding-top:6px;border-top:1px solid #e3e0d8;color:#5b6270">Нажмите на букву L, R или X на ребре, чтобы увидеть, какие позиции слова меняются.</div>'):"");
+ }
+ draw8("cc2",G.cc2.start);draw8("lrx",G.lrx.start);
+})();
+</script>
+</body>
+</html>
